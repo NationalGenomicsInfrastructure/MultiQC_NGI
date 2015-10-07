@@ -10,7 +10,7 @@ For more information about NGI, see http://www.scilifelab.se/platforms/ngi/
 
 For more information about MultiQC, see http://multiqc.info
 
-[<img src="https://raw.githubusercontent.com/ewels/MultiQC/master/multiqc/templates/default/assets/img/MultiQC_logo.png" width="200" title="MultiQC">](https://github.com/ewels/MultiQC) [<img src="https://portal.scilifelab.se/genomics/sites/default/files/NGI-logo-white-background.png" width="200" title="MultiQC">](http://www.scilifelab.se/platforms/ngi/)
+[<img src="https://raw.githubusercontent.com/ewels/MultiQC/master/multiqc/templates/default/assets/img/MultiQC_logo.png" width="200" title="MultiQC">](https://github.com/ewels/MultiQC) [<img src="multiqc_ngi/templates/ngi/assets/img/NGI-final-small.png" width="200" title="MultiQC">](http://www.scilifelab.se/platforms/ngi/)
 
 ## Contents
 This plugin provides two extra templates - `ngi` and `genstat`. `ngi` is a
