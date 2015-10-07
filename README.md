@@ -4,6 +4,8 @@ MultiQC_NGI is a plugin for MultiQC, providing additional tools which are
 specific to the National Genomics Infrastructure at the Science for Life
 Laboratory in Stockholm, Sweden.
 
+[![Build Status](https://travis-ci.org/ewels/MultiQC_NGI.svg?branch=master)](https://travis-ci.org/ewels/MultiQC_NGI)
+
 For more information about NGI, see http://www.scilifelab.se/platforms/ngi/
 
 For more information about MultiQC, see http://multiqc.info
