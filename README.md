@@ -1,16 +1,14 @@
-# MultiQC_NGI
+# [<img src="multiqc/templates/ngi/assets/img/MultiQC_logo.png" width="250" title="MultiQC">](https://github.com/ewels/MultiQC) [<img src="multiqc_ngi/templates/ngi/assets/img/NGI-final-small.png" width="250" title="MultiQC">](http://www.scilifelab.se/platforms/ngi/)
 
-MultiQC_NGI is a plugin for MultiQC, providing additional tools which are
+**MultiQC_NGI is a plugin for MultiQC, providing additional tools which are
 specific to the National Genomics Infrastructure at the Science for Life
-Laboratory in Stockholm, Sweden.
+Laboratory in Stockholm, Sweden.**
 
 [![Build Status](https://travis-ci.org/ewels/MultiQC_NGI.svg?branch=master)](https://travis-ci.org/ewels/MultiQC_NGI)
 
 For more information about NGI, see http://www.scilifelab.se/platforms/ngi/
 
 For more information about MultiQC, see http://multiqc.info
-
-[<img src="https://raw.githubusercontent.com/ewels/MultiQC/master/multiqc/templates/default/assets/img/MultiQC_logo.png" width="200" title="MultiQC">](https://github.com/ewels/MultiQC) [<img src="multiqc_ngi/templates/ngi/assets/img/NGI-final-small.png" width="200" title="MultiQC">](http://www.scilifelab.se/platforms/ngi/)
 
 ## Contents
 This plugin provides two extra templates - `ngi` and `genstat`. `ngi` is a
