@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.4"
+  - "2.7"
+# command to install dependencies
+install:
+  - pip install multiqc
+  - python setup.py -q install
+# command to run tests
+script:
+  - git clone https://github.com/ewels/MultiQC_TestData.git test_data
+  - multiqc -v -o tests/multiqc_report test_data
