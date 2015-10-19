@@ -1,0 +1,15 @@
+{# #######################
+  header.html
+##########################
+
+This block gives the introduction content at the top of each report.
+That is, the page title, welcome message, details of where the report
+was generated and the button that launches the welcome tour.
+
+#}
+
+<h1 id="page_title">{{ config.title }} : MultiQC Report</h1>
+
+<p>Report generated on {{ config.creation_date }} based on data in
+    <code id="mqc_analysis_path">{{ config.analysis_dir |join('</code>
+    and <code id="mqc_analysis_path">') }}</code></p>

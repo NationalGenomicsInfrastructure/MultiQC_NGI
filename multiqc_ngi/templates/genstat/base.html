@@ -1,0 +1,40 @@
+{# #######################
+  base.html
+##########################
+
+This is the base file for the report. This is kept as a bare skeleton and
+imports the rest of the template in as blocks.
+
+This file is called when generating the report. It's filename must be
+specified in __init__.py, eg:
+
+template_fn = 'base.html'
+
+#}
+
+{{ '{% extends "base.html" %}' }}
+<!--
+Template file: < variable filename >
+URL: < variable >
+Title: MultiQC Report
+Description: Project MultiQC report, to be embedded into Genomics Status.
+             Essentially a static HTML file, but with Tornado templates
+             so will inherit genomics status templating styles.
+-->
+{{ '{% block stuff %}' }}
+
+{% include 'includes.html' %}
+{% include 'nav.html' %}
+{% include 'toolbox.html' %}
+
+<div class="mainpage">
+  
+  {% include 'header.html' %}
+  
+  {% include 'general_stats.html' %}
+
+  {% include 'content.html' %}
+
+</div>
+
+{{ '{% end %}' }}

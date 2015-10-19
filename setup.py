@@ -28,7 +28,7 @@ setup(
     entry_points = {
         'multiqc.templates.v1': [
             'ngi = multiqc_ngi.templates.ngi',
-            'genstat = multiqc.templates.genstat',
+            'genstat = multiqc_ngi.templates.genstat',
         ]
     },
     classifiers = [
