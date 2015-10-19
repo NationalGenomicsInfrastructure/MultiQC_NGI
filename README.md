@@ -25,9 +25,6 @@ MultiQC and this package with the following command:
 pip install multiqc git+ssh://git@github.com:ewels/MultiQC_NGI.git
 ```
 
-_(No need to clone the repo if you're just using it and not developing,
-`pip` can install directly from GitHub)_
-
 ## Usage
 To use the new templates, specify their name with the `-t` flag in MultiQC:
 
@@ -40,7 +37,7 @@ If you're developing this code, you'll want to clone it locally and install
 it manually instead of using `pip`:
 
 ```
-git clone git@github.com:ewels/MultiQC_NGI.git --recursive
+git clone git@github.com:ewels/MultiQC_NGI.git
 cd MultiQC_NGI
 python setup.py develop
 ```
