@@ -29,6 +29,9 @@ setup(
         'multiqc.templates.v1': [
             'ngi = multiqc_ngi.templates.ngi',
             'genstat = multiqc_ngi.templates.genstat',
+        ],
+        'multiqc.hooks.v1': [
+            'after_modules = multiqc_ngi.hooks:after_modules',
         ]
     },
     classifiers = [
