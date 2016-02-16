@@ -31,7 +31,7 @@ setup(
             'genstat = multiqc_ngi.templates.genstat',
         ],
         'multiqc.hooks.v1': [
-            'after_modules = multiqc_ngi.hooks:after_modules',
+            'before_template = multiqc_ngi.hooks:find_ngi_project',
         ]
     },
     classifiers = [
