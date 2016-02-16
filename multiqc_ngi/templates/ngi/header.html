@@ -12,17 +12,16 @@ was generated and the button that launches the welcome tour.
   <a class="pull-right" href="http://www.scilifelab.se/platforms/ngi/" target="_blank">
     <img src="data:image/png;base64,{{ include_file('assets/img/NGI-final-small.png', b64=True) }}" title="National Genomics Infrastructure">
   </a>
-  {{ report.ngi['pid']+': ' if report.ngi['pid'] != None }}
-  {{ config.title if config.title != None }}
-  {{ ' <br><small>'+report.ngi['customer_project_reference']+'</small></h1>' if report.ngi['customer_project_reference'] != None }}
+  {{ config.title if config.title != None else 'MultiQC Report' }}
+  {{ ' <br><small>'+report.ngi['customer_project_reference']+'</small></h1>' if 'customer_project_reference' in report.ngi != None }}
 </h1>
 
 <dl class="dl-horizontal">
-  {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if report.ngi['contact_email'] != None }}
-  {{ '<dt>Application Type:</dt><dd>'+report.ngi['application']+'</dd>' if report.ngi['application'] != None }}
-  {{ '<dt>Project Type:</dt><dd>'+report.ngi['project_type']+'</dd>' if report.ngi['project_type'] != None }}
-  {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if report.ngi['sequencing_platform'] != None }}
-  {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if report.ngi['sequencing_setup'] != None }}
+  {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi }}
+  {{ '<dt>Application Type:</dt><dd>'+report.ngi['application']+'</dd>' if 'application' in report.ngi }}
+  {{ '<dt>Project Type:</dt><dd>'+report.ngi['project_type']+'</dd>' if 'project_type' in report.ngi }}
+  {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
+  {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
 </dl>
 
 <p>Report generated on {{ config.creation_date }} based on data in

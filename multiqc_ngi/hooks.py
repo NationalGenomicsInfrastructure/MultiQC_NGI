@@ -2,12 +2,15 @@
 """ MultiQC hook functions - we tie into the MultiQC
 core here to add in extra functionality. """
 
+from __future__ import print_function
+from collections import OrderedDict
 from couchdb import Server
 import logging
 import os
 import re
 import yaml
 
+import multiqc
 from multiqc.utils import (report, config)
 
 log = logging.getLogger('multiqc')
@@ -17,8 +20,12 @@ report.ngi = dict()
 def find_ngi_project():
   """ Try to find a NGI project ID in the sample names.
   If just one found, add to the report header. """
+  
+  # Collect sample IDs
+  # Want to run  before the general stats table is built
+  s_names = [x for m in report.general_stats for x in report.general_stats[m]['data']]
   project_ids = set()
-  for s_name in report.general_stats_raw:
+  for s_name in s_names:
     m = re.search(r'(P\d{3,5})', s_name)
     if m:
       project_ids.add(m.group(1))
@@ -34,7 +41,8 @@ def find_ngi_project():
 
 def add_project_header(pid):
   """ Add NGI project information to report header """
-  meta = get_ngi_project_metadata(pid)
+  get_ngi_project_metadata(pid)
+  general_stats_sample_meta(pid)
 
 
 def get_ngi_project_metadata(pid):
@@ -56,7 +64,8 @@ def get_ngi_project_metadata(pid):
   
   log.info("Found metadata for NGI project '{}'".format(p_summary['project_name']))
   
-  config.title = p_summary['project_name']
+  config.title = '{}: {}'.format(pid, p_summary['project_name'])
+  config.project_name = p_summary['project_name']
   report.ngi['pid'] = pid
   keys = {
     'contact_email':'contact',
@@ -82,6 +91,31 @@ def get_ngi_project_metadata(pid):
   # import json
   # print(json.dumps(p_summary, indent=4))
 
+def general_stats_sample_meta(pid):
+    meta = get_ngi_samples_metadata(pid)
+    
+    report.write_data_file(meta, 'ngi_meta')
+    
+    # if len(meta) > 0:
+    #   headers = OrderedDict()
+    #   headers['reads_aligned_percentage'] = {
+    #     'title': '% Aligned',
+    #     'description': '% reads with at least one reported alignment',
+    #     'max': 100,
+    #     'min': 0,
+    #     'scale': 'YlGn',
+    #     'format': '{:.1f}%'
+    #   }
+    #   headers['reads_aligned'] = {
+    #     'title': 'M Aligned',
+    #     'description': 'reads with at least one reported alignment (millions)',
+    #     'min': 0,
+    #     'scale': 'PuRd',
+    #     'modify': lambda x: x / 1000000,
+    #     'shared_key': 'read_count'
+    #   }
+    #   multiqc.modules.BaseMultiqcModule.general_stats_addcols(meta) #, headers)
+
 
 def get_ngi_samples_metadata(pid):
   """ Get project sample metadata from statusdb """
@@ -94,26 +128,26 @@ def get_ngi_samples_metadata(pid):
     log.error("statusdb returned {} rows when querying {}".format(len(p_samples.rows), pid))
     return None
   return p_samples.rows[0]['value']
-  
-  
-  # for s_name in p_samples:
-  #   self.general_stats_addcols(self.bismark_data['alignment'], headers['alignment'], 'bismark_alignment')
-  # print("\n".join(p_samples.keys()))
 
 
 def connect_statusdb():
   """ Connect to statusdb """
   try:
-    conf_file = os.path.join(os.environ.get('HOME'), '.multiqc_ngi')
+    conf_file = os.path.join(os.environ.get('HOME'), '.ngi_config', 'statusdb.yaml')
     with open(conf_file, "r") as f:
       config = yaml.load(f)
   except IOError:
     log.error("Could not open the config file {}".format(conf_file))
     return None
-  if config['couch_user'] is None or config['password'] is None or config['couch_server'] is None:
+  try:
+    couch_user = config['statusdb']['username']
+    password = config['statusdb']['password']
+    couch_url = config['statusdb']['url']
+    port = config['statusdb']['port']
+  except KeyError:
     log.error("Error parsing the config file {}".format(conf_file))
     return None
-  return Server("http://{}:{}@{}".format(config['couch_user'], config['password'], config['couch_server']))
+  return Server("http://{}:{}@{}:{}".format(couch_user, password, couch_url, port))
 
 
   
