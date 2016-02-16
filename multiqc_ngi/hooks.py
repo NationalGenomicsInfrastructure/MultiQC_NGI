@@ -12,6 +12,8 @@ from multiqc.utils import (report, config)
 
 log = logging.getLogger('multiqc')
 
+report.ngi = dict()
+
 def find_ngi_project():
   """ Try to find a NGI project ID in the sample names.
   If just one found, add to the report header. """
@@ -55,7 +57,7 @@ def get_ngi_project_metadata(pid):
   log.info("Found metadata for NGI project '{}'".format(p_summary['project_name']))
   
   config.title = p_summary['project_name']
-  report.ngi = {'pid': pid}
+  report.ngi['pid'] = pid
   keys = {
     'contact_email':'contact',
     'application': 'application'
