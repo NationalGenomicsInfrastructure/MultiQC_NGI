@@ -93,8 +93,8 @@ def get_ngi_project_metadata(pid):
 
 def general_stats_sample_meta(pid):
     meta = get_ngi_samples_metadata(pid)
-    
-    report.write_data_file(meta, 'ngi_meta')
+    if meta is not None:
+      report.write_data_file(meta, 'ngi_meta')
     
     # if len(meta) > 0:
     #   headers = OrderedDict()
