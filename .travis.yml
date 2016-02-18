@@ -12,4 +12,4 @@ install:
 # command to run tests
 script:
   - multiqc data -t ngi
-  - multiqc data -t genstat
+  - multiqc data -f -t genstat
