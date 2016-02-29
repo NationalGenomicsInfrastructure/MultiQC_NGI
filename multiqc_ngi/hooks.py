@@ -11,16 +11,21 @@ import re
 import yaml
 
 import multiqc
-from multiqc.utils import (report, config)
+from multiqc.utils import report, config
 
 log = logging.getLogger('multiqc')
 
 report.ngi = dict()
 
+# HOOK CLASS AND FUNCTIONS
 class ngi_metadata():
   def __init__(self):
     self.couch = self.connect_statusdb()
-    self.find_ngi_project()
+    if 'project' in config.kwargs and config.kwargs['project'] is not None:
+      log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
+      self.add_project_header(config.kwargs['project'])
+    else:
+      self.find_ngi_project()
 
   def find_ngi_project(self):
     """ Try to find a NGI project ID in the sample names.

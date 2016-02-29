@@ -35,6 +35,9 @@ setup(
             'ngi = multiqc_ngi.templates.ngi',
             'genstat = multiqc_ngi.templates.genstat',
         ],
+        'multiqc.cli_options.v1': [
+            'project = multiqc_ngi.cli:pid_option'
+        ],
         'multiqc.hooks.v1': [
             'after_modules = multiqc_ngi.hooks:ngi_metadata',
         ]
