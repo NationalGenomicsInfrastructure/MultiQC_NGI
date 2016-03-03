@@ -173,17 +173,24 @@ def rename_reports():
   # Check that we have the project name and are using the default filename
   if 'project_name' in report.ngi and config.output_fn_name == 'multiqc_report.html':
     
+    new_report = os.path.join(config.output_dir, '{}_multiqc_report.html'.format(report.ngi['project_name']))
+    new_zip = '{}_multiqc_data.zip'.format(report.ngi['project_name'])
+    zipped_datadir = os.path.join(config.output_dir, '{}.zip'.format(config.data_dir_name))
+    new_data = os.path.join(config.output_dir, '{}_{}'.format(report.ngi['project_name'], config.data_dir_name))
+    
     # Move the main report
-    if os.path.isfile(config.output_fn_name):
-      newfn = '{}_multiqc_report.html'.format(report.ngi['project_name'])
-      if os.path.exists(newfn):
+    if os.path.isfile(config.output_fn):
+      if os.path.exists(new_report):
         if config.force:
-          log.warning("Deleting    : {}   (-f was specified)".format(newfn))
-          os.remove(newfn)
+          log.warning("Deleting    : {}   (-f was specified)".format(new_report))
+          os.remove(new_report)
         else:
-          os.remove(config.output_fn_name)
-          shutil.rmtree(config.data_dir)
-          log.error("MultiQC Report {} already exists.".format(newfn))
+          os.remove(config.output_fn)
+          if config.zip_data_dir:
+            os.remove(zipped_datadir)
+          else:
+            shutil.rmtree(config.data_dir)
+          log.error("MultiQC Report {} already exists.".format(new_report))
           log.error('##############################################')
           log.error("#######    NEW REPORT NOT GENERATED    #######")
           log.error('##############################################')
@@ -192,23 +199,21 @@ def rename_reports():
           log.debug("Temporary data deleted: {}".format(config.data_dir_name))
           sys.exit(1)
       try:
-        os.rename(config.output_fn_name, newfn)
-        config.output_fn_name = newfn
-        log.info('Renaming report : {}'.format(newfn))
+        os.rename(config.output_fn_name, new_report)
+        config.output_fn_name = new_report
+        log.info('Renaming report : {}'.format(new_report))
       except OSError:
-        log.error('Could not rename report: {}'.format(newfn))
+        log.error('Could not rename report: {}'.format(new_report))
     
     # Move the zipped data, if it exists
-    zipped_datadir = '{}.zip'.format(config.data_dir_name)
     if os.path.isfile(zipped_datadir):
-      newfn = '{}_multiqc_data.zip'.format(report.ngi['project_name'])
-      if os.path.exists(newfn):
+      if os.path.exists(new_zip):
         if config.force:
-          log.warning("Deleting        : {}   (-f was specified)".format(newfn))
-          os.remove(newfn)
+          log.warning("Deleting        : {}   (-f was specified)".format(new_zip))
+          os.remove(new_zip)
         else:
           os.remove(zipped_datadir)
-          log.error("MultiQC Report {} already exists.".format(newfn))
+          log.error("MultiQC Report {} already exists.".format(new_zip))
           log.error('#############################################################')
           log.error("#######    NEW REPORT DATA DIRECTORY NOT GENERATED    #######")
           log.error('#############################################################')
@@ -216,22 +221,21 @@ def rename_reports():
           log.debug("Temporary data deleted: {}".format(zipped_datadir))
           sys.exit(1)
       try:
-        os.rename(zipped_datadir, newfn)
-        config.data_dir_name = newfn
-        log.info('Renaming data   : {}'.format(newfn))
+        os.rename(zipped_datadir, new_zip)
+        config.data_dir_name = new_zip
+        log.info('Renaming data   : {}'.format(new_zip))
       except OSError:
-        log.error('Could not rename report: {}'.format(newfn))
+        log.error('Could not rename report: {}'.format(new_zip))
     
     # Move the data directory, if it exists
-    if os.path.isdir(config.data_dir_name):
-      newfn = '{}_{}'.format(report.ngi['project_name'], config.data_dir_name)
-      if os.path.exists(newfn):
+    if os.path.isdir(config.data_dir):
+      if os.path.exists(new_data):
         if config.force:
-          log.warning("Deleting        : {}   (-f was specified)".format(newfn))
-          shutil.rmtree(newfn)
+          log.warning("Deleting        : {}   (-f was specified)".format(new_data))
+          shutil.rmtree(new_data)
         else:
           shutil.rmtree(config.data_dir)
-          log.error("Output directory {} already exists.".format(newfn))
+          log.error("Output directory {} already exists.".format(new_data))
           log.error('#############################################################')
           log.error("#######    NEW REPORT DATA DIRECTORY NOT GENERATED    #######")
           log.error('#############################################################')
@@ -239,11 +243,11 @@ def rename_reports():
           log.debug("Temporary data deleted: {}".format(config.data_dir_name))
           sys.exit(1)
       try:
-        os.rename(config.data_dir_name, newfn)
-        config.data_dir_name = newfn
-        log.info('Renaming data   : {}'.format(newfn))
+        os.rename(config.data_dir_name, new_data)
+        config.data_dir_name = new_data
+        log.info('Renaming data   : {}'.format(new_data))
       except OSError:
-        log.error('Could not rename report: {}'.format(newfn))
+        log.error('Could not rename report: {}'.format(new_data))
 
 
 
