@@ -8,6 +8,8 @@ from couchdb import Server
 import logging
 import os
 import re
+import shutil
+import sys
 import yaml
 
 import multiqc
@@ -59,7 +61,10 @@ class ngi_metadata():
     """ Get project metadata from statusdb """
     if self.couch is None:
       return None
-    p_view = self.couch['projects'].view('project/summary')
+    try:
+      p_view = self.couch['projects'].view('project/summary')
+    except socket.error:
+      log.error('CouchDB Operation timed out')
     p_summary = None
     for row in p_view:
       if row['key'][1] == pid:
@@ -76,6 +81,7 @@ class ngi_metadata():
     config.title = '{}: {}'.format(pid, p_summary['project_name'])
     config.project_name = p_summary['project_name']
     report.ngi['pid'] = pid
+    report.ngi['project_name'] = p_summary['project_name']
     keys = {
       'contact_email':'contact',
       'application': 'application'
@@ -158,4 +164,80 @@ class ngi_metadata():
     return Server("http://{}:{}@{}:{}".format(couch_user, password, couch_url, port))
 
 
+def rename_reports():
+  """
+  Hook to take reports with the default filename and rename to have the
+  NGI project name in the filename instead. eg. A.Project_16_03_multiqc_report.html
+  """
   
+  # Check that we have the project name and are using the default filename
+  if 'project_name' in report.ngi and config.output_fn_name == 'multiqc_report.html':
+    
+    # Move the main report
+    if os.path.isfile(config.output_fn_name):
+      newfn = '{}_multiqc_report.html'.format(report.ngi['project_name'])
+      if os.path.exists(newfn):
+        if config.force:
+          log.warning("Deleting    : {}   (-f was specified)".format(newfn))
+          os.remove(newfn)
+        else:
+          os.remove(config.output_fn_name)
+          shutil.rmtree(config.data_dir)
+          log.error("MultiQC Report {} already exists.".format(newfn))
+          log.error("NEW REPORT NOT GENERATED")
+          log.info("Use -f or --force to overwrite existing reports")
+          log.debug("Temporary report deleted: {}".format(config.output_fn_name))
+          log.debug("Temporary data deleted: {}".format(config.data_dir_name))
+          sys.exit(1)
+      try:
+        os.rename(config.output_fn_name, newfn)
+        config.output_fn_name = newfn
+        log.info('Renaming report : {}'.format(newfn))
+      except OSError:
+        log.error('Could not rename report: {}'.format(newfn))
+    
+    # Move the zipped data, if it exists
+    zipped_datadir = '{}.zip'.format(config.data_dir_name)
+    if os.path.isfile(zipped_datadir):
+      newfn = '{}_multiqc_data.zip'.format(report.ngi['project_name'])
+      if os.path.exists(newfn):
+        if config.force:
+          log.warning("Deleting        : {}   (-f was specified)".format(newfn))
+          os.remove(newfn)
+        else:
+          os.remove(zipped_datadir)
+          log.error("MultiQC Report {} already exists.".format(newfn))
+          log.error("NEW REPORT DATA DIRECTORY NOT GENERATED")
+          log.info("Use -f or --force to overwrite existing reports")
+          log.debug("Temporary data deleted: {}".format(zipped_datadir))
+          sys.exit(1)
+      try:
+        os.rename(zipped_datadir, newfn)
+        config.data_dir_name = newfn
+        log.info('Renaming data   : {}'.format(newfn))
+      except OSError:
+        log.error('Could not rename report: {}'.format(newfn))
+    
+    # Move the data directory, if it exists
+    if os.path.isdir(config.data_dir_name):
+      newfn = '{}_{}'.format(report.ngi['project_name'], config.data_dir_name)
+      if os.path.exists(newfn):
+        if config.force:
+          log.warning("Deleting        : {}   (-f was specified)".format(newfn))
+          shutil.rmtree(newfn)
+        else:
+          shutil.rmtree(config.data_dir)
+          log.error("Output directory {} already exists.".format(newfn))
+          log.error("NEW REPORT DATA DIRECTORY NOT GENERATED")
+          log.info("Use -f or --force to overwrite existing reports")
+          log.debug("Temporary data deleted: {}".format(config.data_dir_name))
+          sys.exit(1)
+      try:
+        os.rename(config.data_dir_name, newfn)
+        config.data_dir_name = newfn
+        log.info('Renaming data   : {}'.format(newfn))
+      except OSError:
+        log.error('Could not rename report: {}'.format(newfn))
+
+
+

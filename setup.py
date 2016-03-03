@@ -40,6 +40,7 @@ setup(
         ],
         'multiqc.hooks.v1': [
             'after_modules = multiqc_ngi.hooks:ngi_metadata',
+            'execution_finish = multiqc_ngi.hooks:rename_reports',
         ]
     },
     classifiers = [
