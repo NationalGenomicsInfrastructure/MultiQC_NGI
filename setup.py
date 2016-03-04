@@ -28,7 +28,8 @@ setup(
     install_requires = [
         'couchdb',
         'simplejson',
-        'pyyaml'
+        'pyyaml',
+        'requests'
     ],
     entry_points = {
         'multiqc.templates.v1': [
