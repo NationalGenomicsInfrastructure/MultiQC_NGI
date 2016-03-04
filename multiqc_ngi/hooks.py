@@ -8,7 +8,9 @@ from couchdb import Server
 import logging
 import os
 import re
+import requests
 import shutil
+import socket
 import sys
 import yaml
 
@@ -23,11 +25,12 @@ report.ngi = dict()
 class ngi_metadata():
   def __init__(self):
     self.couch = self.connect_statusdb()
-    if 'project' in config.kwargs and config.kwargs['project'] is not None:
-      log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
-      self.add_project_header(config.kwargs['project'])
-    else:
-      self.find_ngi_project()
+    if self.couch is not None:
+      if 'project' in config.kwargs and config.kwargs['project'] is not None:
+        log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
+        self.add_project_header(config.kwargs['project'])
+      else:
+        self.find_ngi_project()
 
   def find_ngi_project(self):
     """ Try to find a NGI project ID in the sample names.
@@ -161,7 +164,16 @@ class ngi_metadata():
     except KeyError:
       log.error("Error parsing the config file {}".format(conf_file))
       return None
-    return Server("http://{}:{}@{}:{}".format(couch_user, password, couch_url, port))
+    
+    server_url = "http://{}:{}@{}:{}".format(couch_user, password, couch_url, port)
+    
+    # First, test that we can see the server.
+    try:
+      r = requests.get(server_url, timeout=7)
+    except requests.exceptions.Timeout:
+      return None
+    
+    return Server(server_url)
 
 
 def rename_reports():
