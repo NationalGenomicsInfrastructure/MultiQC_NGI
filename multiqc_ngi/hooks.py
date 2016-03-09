@@ -170,7 +170,7 @@ class ngi_metadata():
     # First, test that we can see the server.
     try:
       r = requests.get(server_url, timeout=3)
-    except requests.exceptions.Timeout:
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
       log.warn("Cannot contact statusdb - skipping NGI metadata stuff")
       return None
     
