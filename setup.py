@@ -40,8 +40,7 @@ setup(
             'project = multiqc_ngi.cli:pid_option'
         ],
         'multiqc.hooks.v1': [
-            'after_modules = multiqc_ngi.hooks:ngi_metadata',
-            'execution_finish = multiqc_ngi.hooks:rename_reports',
+            'after_modules = multiqc_ngi.hooks:ngi_metadata'
         ]
     },
     classifiers = [
