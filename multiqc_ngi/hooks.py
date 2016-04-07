@@ -24,6 +24,8 @@ report.ngi = dict()
 # HOOK CLASS AND FUNCTIONS
 class ngi_metadata():
   def __init__(self):
+    if getattr(config, 'disable_ngi', False) is True:
+      return None
     self.couch = self.connect_statusdb()
     if self.couch is not None:
       if 'project' in config.kwargs and config.kwargs['project'] is not None:
@@ -79,14 +81,14 @@ class ngi_metadata():
       log.error("statusdb returned no rows when querying {}".format(pid))
       return None
     
-    log.info("Found metadata for NGI project '{}'".format(p_summary['project_name']))
+    log.debug("Found metadata for NGI project '{}'".format(p_summary['project_name']))
     
     config.title = '{}: {}'.format(pid, p_summary['project_name'])
     config.project_name = p_summary['project_name']
     config.output_fn_name = '{}_{}'.format(p_summary['project_name'], config.output_fn_name)
     config.data_dir_name = '{}_{}'.format(p_summary['project_name'], config.data_dir_name)
-    log.info("Renaming report filename to '{}'".format(config.output_fn_name))
-    log.info("Renaming data directory to '{}'".format(config.data_dir_name))
+    log.debug("Renaming report filename to '{}'".format(config.output_fn_name))
+    log.debug("Renaming data directory to '{}'".format(config.data_dir_name))
     
     report.ngi['pid'] = pid
     report.ngi['project_name'] = p_summary['project_name']
