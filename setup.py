@@ -32,6 +32,9 @@ setup(
         'requests'
     ],
     entry_points = {
+        'multiqc.modules.v1': [
+            'ngi_rnaseq = multiqc_ngi.modules.ngi_rnaseq:MultiqcModule'
+        ],
         'multiqc.templates.v1': [
             'ngi = multiqc_ngi.templates.ngi',
             'genstat = multiqc_ngi.templates.genstat',
