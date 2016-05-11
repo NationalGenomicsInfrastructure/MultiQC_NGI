@@ -15,7 +15,7 @@ import sys
 import yaml
 
 import multiqc
-from multiqc.utils import report, config
+from multiqc.utils import report, util_functions, config
 
 log = logging.getLogger('multiqc')
 
@@ -40,7 +40,9 @@ class ngi_metadata():
     
     # Collect sample IDs
     # Want to run  before the general stats table is built
-    s_names = [x for m in report.general_stats for x in report.general_stats[m]['data']]
+    s_names = set()
+    for x in report.general_stats_data:
+      s_names.update(x.keys())
     project_ids = set()
     for s_name in s_names:
       m = re.search(r'(P\d{3,5})', s_name)
@@ -119,27 +121,31 @@ class ngi_metadata():
   def general_stats_sample_meta(self, pid):
       meta = self.get_ngi_samples_metadata(pid)
       if meta is not None:
-        report.write_data_file(meta, 'ngi_meta')
+        util_functions.write_data_file(meta, 'ngi_meta')
       
-      # if len(meta) > 0:
-      #   headers = OrderedDict()
-      #   headers['reads_aligned_percentage'] = {
-      #     'title': '% Aligned',
-      #     'description': '% reads with at least one reported alignment',
-      #     'max': 100,
-      #     'min': 0,
-      #     'scale': 'YlGn',
-      #     'format': '{:.1f}%'
-      #   }
-      #   headers['reads_aligned'] = {
-      #     'title': 'M Aligned',
-      #     'description': 'reads with at least one reported alignment (millions)',
-      #     'min': 0,
-      #     'scale': 'PuRd',
-      #     'modify': lambda x: x / 1000000,
-      #     'shared_key': 'read_count'
-      #   }
-      #   multiqc.modules.BaseMultiqcModule.general_stats_addcols(meta) #, headers)
+      if len(meta) > 0:
+        gsdata = dict()
+        formats = set()
+        for s_name in meta:
+          gsdata[s_name] = {
+            'initial_qc_conc': meta[s_name]['initial_qc']['concentration']
+          }
+          formats.add(meta[s_name]['initial_qc']['conc_units'])
+        if len(formats) != 1:
+          log.warning("Mixture of initial QC concentration units! Skipping. Found: {}".format(", ".join(formats)))
+        else:
+          gsheaders = OrderedDict()
+          gsheaders['initial_qc_conc'] = {
+            'namespace': 'NGI',
+            'title': 'Conc.',
+            'description': 'Initial QC Concentration ({})'.format(formats.pop()),
+            'min': 0,
+            'scale': 'YlGn',
+            'format': '{:.0f}'
+          }
+        
+          report.general_stats_data.append(gsdata)
+          report.general_stats_headers.append(gsheaders)
 
 
   def get_ngi_samples_metadata(self, pid):
