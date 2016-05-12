@@ -41,7 +41,37 @@ was generated and the button that launches the welcome tour.
   {% endif %}
 </div>
 
-<hr id="mqc_header_hr">
+<div class="btn-group" role="group" id="ngi_name_switch">
+  <button id="ngi_s_names" type="button" class="btn btn-default active">NGI names</button>
+  <button id="ngi_user_s_names" type="button" class="btn btn-default">User supplied names</button>
+</div>
+<script type="text/javascript">
+$(function(){
+  var ngi_sample_names = {{ report.ngi['ngi_names_json'] }};
+  $('#ngi_name_switch button').click(function(e){
+    e.preventDefault();
+    $('#ngi_name_switch button').removeClass('active');
+    $(this).addClass('active');
+    if($(this).attr('id') == 'ngi_user_s_names'){
+      for(var s in ngi_sample_names){
+        var li = '<li id="ngi_name_switch_'+s+'"><input class="f_text from_text" value="'+s+'" />'
+        li += '<small class="glyphicon glyphicon-chevron-right"></small><input class="f_text to_text" value="'+ngi_sample_names[s]+'" />'
+        li += '<button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></li>'
+        $('#mqc_renamesamples_filters').append(li);
+      }
+      apply_mqc_renamesamples();
+    } else {
+      for(var s in ngi_sample_names){
+        $('#ngi_name_switch_'+s).remove();
+      }
+      apply_mqc_renamesamples();
+    }
+  });
+});
+</script>
+{{ report.ngi_names_js }}
+
+<hr>
 
 <div class="alert alert-info alert-dismissible hidden-print" id="mqc_welcome" style="display: none;">
   <button type="button" data-dismiss="alert" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
