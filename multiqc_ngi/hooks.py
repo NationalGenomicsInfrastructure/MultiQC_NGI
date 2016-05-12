@@ -24,11 +24,17 @@ report.ngi = dict()
 
 # HOOK CLASS AND FUNCTIONS
 class ngi_metadata():
+    
     def __init__(self):
+        
+        # Check that these hooks haven't been disabled in the config file
         if getattr(config, 'disable_ngi', False) is True:
             return None
+        
+        # Connect to StatusDB
         self.couch = self.connect_statusdb()
         if self.couch is not None:
+            
             # Get project ID
             pid = None
             if 'project' in config.kwargs and config.kwargs['project'] is not None:
@@ -51,21 +57,20 @@ class ngi_metadata():
         If just one found, add to the report header. """
         
         # Collect sample IDs
-        # Want to run    before the general stats table is built
-        s_names = set()
+        self.s_names = set()
         for x in report.general_stats_data:
-            s_names.update(x.keys())
-        project_ids = set()
-        for s_name in s_names:
+            self.s_names.update(x.keys())
+        pids = set()
+        for s_name in self.s_names:
             m = re.search(r'(P\d{3,5})', s_name)
             if m:
-                project_ids.add(m.group(1))
-        project_ids = list(project_ids)
-        if len(project_ids) == 1:
-            log.info("Found one NGI project id: {}".format(project_ids[0]))
-            return project_ids[0]
-        elif len(project_ids) > 1:
-            log.warn("Multiple NGI project IDs found! {}".format(",".join(project_ids)))
+                pids.add(m.group(1))
+        if len(pids) == 1:
+            pid = pids.pop()
+            log.info("Found one NGI project id: {}".format(pid))
+            return pid
+        elif len(pids) > 1:
+            log.warn("Multiple NGI project IDs found! {}".format(",".join(pids)))
             return None
         else:
             log.info("No NGI project IDs found.")
@@ -149,26 +154,48 @@ class ngi_metadata():
             if len(meta) > 0:
                 gsdata = dict()
                 formats = set()
-                for s_name in meta:
-                    gsdata[s_name] = {
-                        'initial_qc_conc': meta[s_name]['initial_qc']['concentration']
-                    }
-                    formats.add(meta[s_name]['initial_qc']['conc_units'])
-                if len(formats) != 1:
-                    log.warning("Mixture of initial QC concentration units! Skipping. Found: {}".format(", ".join(formats)))
-                else:
-                    gsheaders = OrderedDict()
-                    gsheaders['initial_qc_conc'] = {
-                        'namespace': 'NGI',
-                        'title': 'Conc.',
-                        'description': 'Initial QC Concentration ({})'.format(formats.pop()),
-                        'min': 0,
-                        'scale': 'YlGn',
-                        'format': '{:.0f}'
-                    }
+                s_names = dict()
+                conc_units = ''
+                for sid in meta:
+                    # Find first sample name matching this sample ID
+                    s_name = sid
+                    for x in sorted(self.s_names):
+                        if sid in x:
+                            s_name = x
+                            s_names[s_name] = x
+                            break
+                    
+                    # Create a dict with the data that we want
+                    gsdata[s_name] = dict()
+                    try:
+                        gsdata[s_name]['initial_qc_conc'] = meta[sid]['initial_qc']['concentration']
+                        formats.add(meta[sid]['initial_qc']['conc_units'])
+                    except KeyError:
+                        pass
                 
-                    report.general_stats_data.append(gsdata)
-                    report.general_stats_headers.append(gsheaders)
+                # Deal with having more than one initial QC concentration unit
+                if len(formats) > 1:
+                    log.warning("Mixture of initial QC concentration units! Found: {}".format(", ".join(formats)))
+                    for s_name in gsdata:
+                        try:
+                            gsdata[s_name]['initial_qc_conc'] += ' '+meta[s_names[s_name]]['initial_qc']['conc_units']
+                        except KeyError:
+                            pass
+                elif len(formats) == 1:
+                    conc_units = formats.pop()
+                
+                gsheaders = OrderedDict()
+                gsheaders['initial_qc_conc'] = {
+                    'namespace': 'NGI',
+                    'title': 'Conc. ({})'.format(conc_units),
+                    'description': 'Initial QC Concentration ({})'.format(conc_units),
+                    'min': 0,
+                    'scale': 'YlGn',
+                    'format': '{:.0f}'
+                }
+            
+                report.general_stats_data.append(gsdata)
+                report.general_stats_headers.append(gsheaders)
     
 
     def connect_statusdb(self):
