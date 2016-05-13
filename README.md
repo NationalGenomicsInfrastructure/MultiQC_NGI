@@ -32,6 +32,22 @@ To use the new templates, specify their name with the `-t` flag in MultiQC:
 multiqc -t ngi .
 ```
 
+There are two new command line flags introduced by the plugin:
+
+* `--project`
+  * Specify a Project ID number, instead of automatically searching for one in sample names
+* `--push/--no-push`
+  * Override the config file default for whether to push results to StatusDB.
+
+## Configuration
+The MultiQC_NGI plugin has some configuration options which you can add to the main
+MultiQC config files (`inst_dir/multiqc_config.yaml`, `~/.multiqc_config.yaml` and `./multiqc_config.yaml`).
+They are (with default values):
+```yaml
+disable_ngi: False          # Disable the MultiQC_NGI hooks
+push_statusdb: False        # Enable pushing to StatusDB by default.
+```
+
 ## Development
 If you're developing this code, you'll want to clone it locally and install
 it manually instead of using `pip`:

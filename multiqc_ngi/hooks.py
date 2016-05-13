@@ -57,6 +57,16 @@ class ngi_metadata():
                 
                 # Add to General Stats table
                 self.general_stats_sample_meta()
+                
+                # Push MultiQC data to StatusDB
+                if getattr(config, 'push_statusdb', None) is None:
+                    config.push_statusdb = False
+                if config.kwargs.get('push_statusdb', None) is not None:
+                    config.push_statusdb = config.kwargs['push_statusdb']
+                if config.push_statusdb:
+                    self.push_statusdb_multiqc_data()
+                else:
+                    log.info("Not pushing results to StatusDB. To do this, use --push or set config push_statusdb: True")
 
 
     def find_ngi_project(self):
@@ -67,6 +77,8 @@ class ngi_metadata():
         self.s_names = set()
         for x in report.general_stats_data:
             self.s_names.update(x.keys())
+        for d in report.saved_raw_data.values():
+            self.s_names.update(d.keys())
         pids = set()
         for s_name in self.s_names:
             m = re.search(r'(P\d{3,5})', s_name)
@@ -155,10 +167,14 @@ class ngi_metadata():
             """ Add metadata about each sample to the General Stats table """
             
             meta = report.ngi['sample_meta']
-            if meta is not None:
+            if meta is not None and len(meta) > 0:
+                
+                log.info('Found {} samples in StatusDB'.format(len(meta)))
+                
+                # Write to file
                 util_functions.write_data_file(meta, 'ngi_meta')
-            
-            if len(meta) > 0:
+                
+                # Add to General Stats table
                 gsdata = dict()
                 formats = set()
                 s_names = dict()
@@ -203,6 +219,69 @@ class ngi_metadata():
             
                 report.general_stats_data.append(gsdata)
                 report.general_stats_headers.append(gsheaders)
+    
+    
+    def push_statusdb_multiqc_data(self):
+        """ Push data parsed by MultiQC modules to the analysis database
+        in statusdb. """
+        
+        # StatusDB view code for analysis/project_id view:
+        # function(doc) {
+        #   var project_id=Object.keys(doc.samples)[0].split('_')[0];
+        #   emit(project_id, doc);
+        # }
+        
+        # Connect to the analysis database
+        if self.couch is None:
+            return None
+        try:
+            db = self.couch['analysis']
+            p_view = db.view('project/project_id')
+        except socket.error:
+            log.error('CouchDB Operation timed out')
+            return None
+        
+        # Try to get an existing document if one exists
+        doc = {}
+        for row in p_view:
+            if row['key'] == report.ngi['pid']:
+                doc = row.value
+                break
+        
+        # Start fresh unless the existing doc looks similar
+        newdoc = {
+            'entity_type': 'MultiQC_data',
+            'project_id': report.ngi['pid'],
+            'project_name': report.ngi['project_name'],
+            'MultiQC_version': config.version,
+            'MultiQC_NGI_version': config.multiqc_ngi_version,
+        }
+        for k in newdoc.keys():
+            try:
+                assert(doc[k] == newdoc[k])
+            except (KeyError, AssertionError):
+                doc = newdoc
+                log.info('Creating new analysis record in StatusDB')
+                break
+        if doc != newdoc:
+            log.info('Updating existing analysis record in StatusDB')
+        
+        # Add sample metadata to doc
+        if 'samples' not in doc:
+            doc['samples'] = dict()
+        for key, d in report.saved_raw_data.items():
+            for s_name in d:
+                m = re.search(r'(P\d{3,5}_\d{1,6})', s_name)
+                if m:
+                    sid = m.group(1)
+                else:
+                    sid = s_name
+                if sid not in doc['samples']:
+                    doc['samples'][sid] = dict()
+                doc['samples'][sid][key] = d[s_name]
+        
+        # Save object to the database
+        db.save(doc)
     
 
     def connect_statusdb(self):
