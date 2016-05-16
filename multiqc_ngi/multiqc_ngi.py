@@ -47,6 +47,9 @@ class ngi_metadata():
             if 'project' in config.kwargs and config.kwargs['project'] is not None:
                 log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
                 pid = config.kwargs['project']
+                self.s_names = set()
+                for x in report.general_stats_data:
+                    self.s_names.update(x.keys())
             else:
                 pid = self.find_ngi_project()
             
@@ -181,20 +184,35 @@ class ngi_metadata():
                 conc_units = ''
                 for sid in meta:
                     # Find first sample name matching this sample ID
-                    s_name = sid
+                    s_name = None
                     for x in sorted(self.s_names):
                         if sid in x:
                             s_name = x
                             s_names[s_name] = x
                             break
                     
+                    # Skip this sample if we don't have any matching data
+                    if s_name is None:
+                        log.debug("Skipping StatusDB metadata for sample {} as no bioinfo report logs found.".format(sid))
+                        continue
+                    
                     # Create a dict with the data that we want
                     gsdata[s_name] = dict()
+                    try:
+                        gsdata[s_name]['initial_qc_amount'] = meta[sid]['initial_qc']['amount_(ng)']
+                    except KeyError:
+                        pass
                     try:
                         gsdata[s_name]['initial_qc_conc'] = meta[sid]['initial_qc']['concentration']
                         formats.add(meta[sid]['initial_qc']['conc_units'])
                     except KeyError:
                         pass
+                    try:
+                        gsdata[s_name]['initial_qc_rin'] = meta[sid]['initial_qc']['rin']
+                    except KeyError:
+                        pass
+                
+                log.info("Matched {} samples from StatusDB with report sample names".format(len(s_names)))
                 
                 # Deal with having more than one initial QC concentration unit
                 if len(formats) > 1:
@@ -208,6 +226,15 @@ class ngi_metadata():
                     conc_units = formats.pop()
                 
                 gsheaders = OrderedDict()
+                gsheaders['initial_qc_rin'] = {
+                    'namespace': 'NGI',
+                    'title': 'RIN',
+                    'description': 'Initial QC: RNA Integrity Number',
+                    'min': 0,
+                    'max': 10,
+                    'scale': 'YlGn',
+                    'format': '{:.2f}'
+                }
                 gsheaders['initial_qc_conc'] = {
                     'namespace': 'NGI',
                     'title': 'Conc. ({})'.format(conc_units),
@@ -216,7 +243,15 @@ class ngi_metadata():
                     'scale': 'YlGn',
                     'format': '{:.0f}'
                 }
-            
+                gsheaders['initial_qc_amount'] = {
+                    'namespace': 'NGI',
+                    'title': 'Amount. (&mu;g)',
+                    'description': 'Initial QC Amount (&mu;g)',
+                    'min': 0,
+                    'scale': 'YlGn',
+                    'format': '{:.2f}'
+                }
+                
                 report.general_stats_data.append(gsdata)
                 report.general_stats_headers.append(gsheaders)
     
