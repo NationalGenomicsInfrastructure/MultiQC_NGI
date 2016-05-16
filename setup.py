@@ -44,7 +44,7 @@ setup(
             'push_statusdb = multiqc_ngi.cli:push_flag'
         ],
         'multiqc.hooks.v1': [
-            'after_modules = multiqc_ngi.hooks:ngi_metadata'
+            'after_modules = multiqc_ngi.multiqc_ngi:ngi_metadata'
         ]
     },
     classifiers = [
