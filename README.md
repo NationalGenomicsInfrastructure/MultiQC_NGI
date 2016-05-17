@@ -59,6 +59,9 @@ python setup.py develop
 ```
 
 ### Changelog
+#### v0.2dev
+_..nothing yet.._
+
 #### [v0.1](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.1) - 2016-05-17
 Initial release.
 * Module for NextFlow RNA-Seq BP pipeline
