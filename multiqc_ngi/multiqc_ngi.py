@@ -179,7 +179,7 @@ class ngi_metadata():
                 
                 # Add to General Stats table
                 gsdata = dict()
-                formats = set()
+                formats = dict()
                 s_names = dict()
                 conc_units = ''
                 for sid in meta:
@@ -199,31 +199,55 @@ class ngi_metadata():
                     # Create a dict with the data that we want
                     gsdata[s_name] = dict()
                     try:
-                        gsdata[s_name]['initial_qc_amount'] = meta[sid]['initial_qc']['amount_(ng)']
-                    except KeyError:
-                        pass
-                    try:
-                        gsdata[s_name]['initial_qc_conc'] = meta[sid]['initial_qc']['concentration']
-                        formats.add(meta[sid]['initial_qc']['conc_units'])
-                    except KeyError:
-                        pass
-                    try:
                         gsdata[s_name]['initial_qc_rin'] = meta[sid]['initial_qc']['rin']
                     except KeyError:
                         pass
+                    
+                    # Try to figure out which library prep was used
+                    seq_lp = None
+                    for lp in sorted(meta[sid]['library_prep'].keys()):
+                        if len(meta[sid]['library_prep'][lp]['sample_run_metrics']) > 0:
+                            if seq_lp is None:
+                                seq_lp = lp
+                            else:
+                                seq_lp = None
+                                log.warn('Found multiple sequenced lib preps for {} - skipping metadata'.format(sid))
+                                break
+                    if seq_lp is not None:
+                        try:
+                            gsdata[s_name]['amount_taken'] = meta[sid]['library_prep'][lp]['amount_taken_(ng)']
+                        except KeyError:
+                            pass
+                        try:
+                            for lv in sorted(meta[sid]['library_prep'][lp]['library_validation'].keys()): 
+                                gsdata[s_name]['lp_concentration'] = meta[sid]['library_prep'][lp]['library_validation'][lv]['concentration']
+                                formats[s_name] = meta[sid]['library_prep'][lp]['library_validation'][lv]['conc_units']
+                        except KeyError:
+                            pass
                 
                 log.info("Matched {} samples from StatusDB with report sample names".format(len(s_names)))
                 
                 # Deal with having more than one initial QC concentration unit
-                if len(formats) > 1:
-                    log.warning("Mixture of initial QC concentration units! Found: {}".format(", ".join(formats)))
+                formats_set = set(formats.values())
+                if len(formats_set) > 1:
+                    log.warning("Mixture of library_validation concentration units! Found: {}".format(", ".join(formats_set)))
                     for s_name in gsdata:
                         try:
-                            gsdata[s_name]['initial_qc_conc'] += ' '+meta[s_names[s_name]]['initial_qc']['conc_units']
+                            gsdata[s_name]['lp_concentration'] = '{} {}'.format(gsdata[s_name]['lp_concentration'], formats[s_name])
                         except KeyError:
                             pass
-                elif len(formats) == 1:
-                    conc_units = formats.pop()
+                elif len(formats_set) == 1:
+                    conc_units = formats_set.pop()
+                
+                # Decide on whether to show or hide conc & amount taken based on range
+                concs = [gsdata[x]['lp_concentration'] for x in gsdata]
+                conc_hidden = True
+                if max(concs) - min(concs) > 50:
+                    conc_hidden = False
+                amounts = [gsdata[x]['amount_taken'] for x in gsdata]
+                amounts_hidden = True
+                if max(amounts) - min(amounts) > 10:
+                    amounts_hidden = False
                 
                 gsheaders = OrderedDict()
                 gsheaders['initial_qc_rin'] = {
@@ -235,21 +259,23 @@ class ngi_metadata():
                     'scale': 'YlGn',
                     'format': '{:.2f}'
                 }
-                gsheaders['initial_qc_conc'] = {
+                gsheaders['lp_concentration'] = {
                     'namespace': 'NGI',
-                    'title': 'Conc. ({})'.format(conc_units),
-                    'description': 'Initial QC Concentration ({})'.format(conc_units),
+                    'title': 'Lib Conc. ({})'.format(conc_units),
+                    'description': 'Library Prep: Concentration ({})'.format(conc_units),
                     'min': 0,
                     'scale': 'YlGn',
-                    'format': '{:.0f}'
+                    'format': '{:.0f}',
+                    'hidden': conc_hidden
                 }
-                gsheaders['initial_qc_amount'] = {
+                gsheaders['amount_taken'] = {
                     'namespace': 'NGI',
-                    'title': 'Amount. (&mu;g)',
-                    'description': 'Initial QC Amount (&mu;g)',
+                    'title': 'Amount Taken (ng)',
+                    'description': 'Library Prep: Amount Taken (ng)',
                     'min': 0,
                     'scale': 'YlGn',
-                    'format': '{:.2f}'
+                    'format': '{:.0f}',
+                    'hidden': amounts_hidden
                 }
                 
                 report.general_stats_data.append(gsdata)
