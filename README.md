@@ -59,5 +59,16 @@ python setup.py develop
 ```
 
 ### Changelog
-#### v0.1dev
-* Initial release.
+#### [v0.1](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.1) - 2016-05-17
+Initial release.
+* Module for NextFlow RNA-Seq BP pipeline
+  * Heatmap of sample correlations
+  * MDS plot
+* Automatically find Project ID from report, or specify with `--project`
+* Pull project and sample metadata from StatusDB
+  * `NGI` template shows project metadata at head of report, plus NGI logo
+  * General Stats columns added for `RIN`, `Library Concentration` and `Library Amount Taken`
+* Push MultiQC report data to StatusDB
+  * `config.push_statusdb` or `--push`/`--no-push`
+* Ability to disable StatusDB interactions with `config.disable_ngi`
+* `genstat` barebones template started, but not complete.
