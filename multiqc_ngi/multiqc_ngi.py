@@ -353,7 +353,12 @@ class ngi_metadata():
                 config = yaml.load(f)
         except IOError:
             log.warn("Could not open the MultiQC_NGI statusdb config file {}".format(conf_file))
-            return None
+            try:
+                with open(os.environ.get('STATUS_DB_CONFIG'), "r") as f:
+                    config = yaml.load(f)
+            except (KeyError, IOError):
+                log.warn("Could not get the MultiQC_NGI statusdb config file from env STATUS_DB_CONFIG")
+                return None
         try:
             couch_user = config['statusdb']['username']
             password = config['statusdb']['password']
