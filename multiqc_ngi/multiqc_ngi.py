@@ -206,13 +206,16 @@ class ngi_metadata():
                     # Try to figure out which library prep was used
                     seq_lp = None
                     for lp in sorted(meta[sid]['library_prep'].keys()):
-                        if len(meta[sid]['library_prep'][lp]['sample_run_metrics']) > 0:
-                            if seq_lp is None:
-                                seq_lp = lp
-                            else:
-                                seq_lp = None
-                                log.warn('Found multiple sequenced lib preps for {} - skipping metadata'.format(sid))
-                                break
+                        try:
+                            if len(meta[sid]['library_prep'][lp]['sample_run_metrics']) > 0:
+                                if seq_lp is None:
+                                    seq_lp = lp
+                                else:
+                                    seq_lp = None
+                                    log.warn('Found multiple sequenced lib preps for {} - skipping metadata'.format(sid))
+                                    break
+                        except KeyError:
+                            pass
                     if seq_lp is not None:
                         try:
                             gsdata[s_name]['amount_taken'] = meta[sid]['library_prep'][lp]['amount_taken_(ng)']
@@ -240,13 +243,19 @@ class ngi_metadata():
                     conc_units = formats_set.pop()
                 
                 # Decide on whether to show or hide conc & amount taken based on range
-                concs = [gsdata[x]['lp_concentration'] for x in gsdata]
                 conc_hidden = True
-                if max(concs) - min(concs) > 50:
-                    conc_hidden = False
-                amounts = [gsdata[x]['amount_taken'] for x in gsdata]
                 amounts_hidden = True
-                if max(amounts) - min(amounts) > 10:
+                try:
+                    concs = [gsdata[x]['lp_concentration'] for x in gsdata]
+                    if max(concs) - min(concs) > 50:
+                        conc_hidden = False
+                except KeyError:
+                    conc_hidden = False
+                try:
+                    amounts = [gsdata[x]['amount_taken'] for x in gsdata]
+                    if max(amounts) - min(amounts) > 10:
+                        amounts_hidden = False
+                except KeyError:
                     amounts_hidden = False
                 
                 gsheaders = OrderedDict()
