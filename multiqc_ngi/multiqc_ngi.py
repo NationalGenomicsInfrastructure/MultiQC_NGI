@@ -38,6 +38,12 @@ class ngi_after_modules():
                     log.debug('Hiding FastQC % dups in General Stats as we have Picard MarkDups as well.')
                     break
         
+        # Run WGS Piper specific cleanup
+        for f in report.files:
+            if 'piper_ngi' in f['root'].split(os.sep):
+                self.ngi_wgs_cleanup()
+                break
+        
         # Connect to StatusDB
         self.couch = self.connect_statusdb()
         if self.couch is not None:
@@ -72,6 +78,38 @@ class ngi_after_modules():
                     log.info("Not pushing results to StatusDB. To do this, use --push or set config push_statusdb: True")
 
 
+    def ngi_wgs_cleanup(self):
+        """ WGS Piper specific cleanup steps.
+        - Clean up sample names to just the NGI sample ID in general stats
+        - Remove FastQC results from the general statistics table (lane level)
+        """
+        # Remove FastQC and FastQ_screen from General Stats
+        del_idx = list()
+        for idx, h in enumerate(report.general_stats_headers):
+            for col in h.values():
+                if col.get('namespace') == 'FastQC':
+                    del_idx.append(idx)
+                    break
+                if col.get('namespace') == 'FastQ Screen':
+                    del_idx.append(idx)
+                    break
+        for i in del_idx:
+            del report.general_stats_headers[i]
+            del report.general_stats_data[i]
+        
+        for x, data in enumerate(report.general_stats_data):
+            new_d = {}
+            for s_name in report.general_stats_data[x].keys():
+                m = re.search(r'(P\d{3,5}_\d{3,6})', s_name)
+                if m:
+                    s = m.group(1)
+                else:
+                    s = s_name
+                new_d[s] = report.general_stats_data[x][s_name]
+            
+            report.general_stats_data[x] = new_d
+    
+    
     def find_ngi_project(self):
         """ Try to find a NGI project ID in the sample names.
         If just one found, add to the report header. """
