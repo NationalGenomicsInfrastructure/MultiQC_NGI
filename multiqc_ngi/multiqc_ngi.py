@@ -22,8 +22,8 @@ log = logging.getLogger('multiqc')
 
 report.ngi = dict()
 
-# HOOK CLASS AND FUNCTIONS
-class ngi_metadata():
+# NGI specific code to run after the modules have finished
+class ngi_after_modules():
     
     def __init__(self):
         
