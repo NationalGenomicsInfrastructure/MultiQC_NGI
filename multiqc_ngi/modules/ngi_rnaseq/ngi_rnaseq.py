@@ -14,15 +14,15 @@ from . import mds_plot
 from . import heatmap
 
 # Initialise the logger
-log = logging.getLogger(__name__)
+log = logging.getLogger('multiqc.modules.ngi_rnaseq')
 
 class MultiqcModule(BaseMultiqcModule):
 
     def __init__(self):
 
         # Initialise the parent object
-        super(MultiqcModule, self).__init__(name='NGI-RNAseq', anchor='ngi_rnaseq', 
-        href="https://github.com/SciLifeLab/NGI-RNAseq/", 
+        super(MultiqcModule, self).__init__(name='NGI-RNAseq', anchor='ngi_rnaseq',
+        href="https://github.com/SciLifeLab/NGI-RNAseq/",
         info=" is a Best Practice analysis pipeline, used at the SciLifeLab National Genomics Infrastructure for RNA-Seq.")
 
         # Set up class objects to hold parsed data

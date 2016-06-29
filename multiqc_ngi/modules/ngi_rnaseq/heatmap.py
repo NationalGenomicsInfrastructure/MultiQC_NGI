@@ -11,7 +11,7 @@ import re
 from multiqc import config, plots
 
 # Initialise the logger
-log = logging.getLogger(__name__)
+log = logging.getLogger('multiqc.modules.ngi_rnaseq')
 
 
 def parse_reports(self):
@@ -24,7 +24,7 @@ def parse_reports(self):
     try:
         sp = config.sp['ngi_rnaseq']['heatmap']
     except KeyError:
-        sp = {'fn': 'log2CPM_sample_distances.txt'}        
+        sp = {'fn': 'log2CPM_sample_distances.txt'}
     
     # Go through files and parse data using regexes
     found_heatmap = False
@@ -55,8 +55,8 @@ def parse_reports(self):
             'name': 'Sample Similarity',
             'anchor': 'ngi_rnaseq-sample_similarity',
             'content': '<p>To generate this plot, gene counts are normalised using ' +
-                '<a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html" target="_blank">edgeR</a>. ' + 
-                'Euclidean distances between log<sub>2</sub> normalised CPM values are then calculated and clustered.</p>' + 
+                '<a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html" target="_blank">edgeR</a>. ' +
+                'Euclidean distances between log<sub>2</sub> normalised CPM values are then calculated and clustered.</p>' +
                 plots.heatmap.plot(data, xcats, ycats, pconfig)
         })
     

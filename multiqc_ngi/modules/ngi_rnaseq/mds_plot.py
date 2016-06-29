@@ -12,7 +12,7 @@ from multiqc import config, plots
 
 
 # Initialise the logger
-log = logging.getLogger(__name__)
+log = logging.getLogger('multiqc.modules.ngi_rnaseq')
 
 
 def parse_reports(self):
@@ -25,7 +25,7 @@ def parse_reports(self):
     try:
         sp = config.sp['ngi_rnaseq']['mds_plot']
     except KeyError:
-        sp = {'fn': 'edgeR_MDS_plot_coordinates.txt'}        
+        sp = {'fn': 'edgeR_MDS_plot_coordinates.txt'}
     
     # Go through files and parse data using regexes
     found_mds_plot = False
