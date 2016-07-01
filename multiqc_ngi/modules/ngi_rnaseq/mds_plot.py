@@ -40,7 +40,7 @@ def parse_reports(self):
                 xTitle = s[0]
                 yTitle = s[1]
             else:
-                data[s[0]] = {'x': float(s[1]), 'y': float(s[2])}
+                data[s[0]] = [{'x': float(s[1]), 'y': float(s[2])}]
         # Should only have one MDS plot per report
         if found_mds_plot:
             log.debug("Duplicate sample name found! Overwriting: {}".format(f['s_name']))
@@ -48,7 +48,6 @@ def parse_reports(self):
         self.add_data_source(f, section='mds_plot')
     
     if found_mds_plot:
-        import json
         pconfig = {
             'xTitle': xTitle,
             'yTitle': yTitle
@@ -56,9 +55,7 @@ def parse_reports(self):
         self.sections.append({
             'name': 'MDS Plot',
             'anchor': 'ngi_rnaseq-mds_plot',
-            'content': '<div class="alert alert-info">A scatter plot will go here when written.</div> ' + 
-                '<pre style="font-size:0.8em;">' + "\n".join(["{}  {}  {}".format(k, v['x'], v['y']) for (k, v) in data.items()]) + '</pre>'
-            # plots.scatter.plot(data, pconfig)
+            'content': plots.scatter.plot(data, pconfig)
         })
     
     # Return number of samples found
