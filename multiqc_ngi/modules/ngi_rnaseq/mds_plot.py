@@ -49,8 +49,9 @@ def parse_reports(self):
     
     if found_mds_plot:
         pconfig = {
-            'xTitle': xTitle,
-            'yTitle': yTitle
+            'title': 'MDS Plot',
+            'xlab': xTitle,
+            'ylab': yTitle
         }
         self.sections.append({
             'name': 'MDS Plot',
