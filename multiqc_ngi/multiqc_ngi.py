@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 """ MultiQC hook functions - we tie into the MultiQC
 core here to add in extra functionality. """
@@ -181,12 +182,12 @@ class ngi_after_modules():
             try:
                 report.ngi[i] = p_summary[j]
             except KeyError:
-                raise
+                log.warn("Couldn't find '{}' in project summary".format(j))
         for i, j in d_keys.items():
             try:
                 report.ngi[i] = p_summary['details'][j]
             except KeyError:
-                raise
+                log.warn("Couldn't find '{}' in project details".format(j))
 
 
     def get_ngi_samples_metadata(self, pid):
@@ -207,7 +208,7 @@ class ngi_after_modules():
     def general_stats_sample_meta(self):
             """ Add metadata about each sample to the General Stats table """
             
-            meta = report.ngi['sample_meta']
+            meta = report.ngi.get('sample_meta')
             if meta is not None and len(meta) > 0:
                 
                 log.info('Found {} samples in StatusDB'.format(len(meta)))
@@ -243,7 +244,7 @@ class ngi_after_modules():
                     
                     # Try to figure out which library prep was used
                     seq_lp = None
-                    for lp in sorted(meta[sid]['library_prep'].keys()):
+                    for lp in sorted(meta[sid].get('library_prep', {}).keys()):
                         try:
                             if len(meta[sid]['library_prep'][lp]['sample_run_metrics']) > 0:
                                 if seq_lp is None:
@@ -287,7 +288,7 @@ class ngi_after_modules():
                     concs = [gsdata[x]['lp_concentration'] for x in gsdata]
                     if max(concs) - min(concs) > 50:
                         conc_hidden = False
-                except KeyError:
+                except KeyError, ValueError:
                     conc_hidden = False
                 try:
                     amounts = [gsdata[x]['amount_taken'] for x in gsdata]
@@ -426,4 +427,3 @@ class ngi_after_modules():
             return None
         
         return Server(server_url)
-
