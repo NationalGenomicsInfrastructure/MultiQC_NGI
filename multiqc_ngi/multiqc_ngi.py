@@ -288,7 +288,7 @@ class ngi_after_modules():
                     concs = [gsdata[x]['lp_concentration'] for x in gsdata]
                     if max(concs) - min(concs) > 50:
                         conc_hidden = False
-                except KeyError, ValueError:
+                except (KeyError, ValueError):
                     conc_hidden = False
                 try:
                     amounts = [gsdata[x]['amount_taken'] for x in gsdata]
