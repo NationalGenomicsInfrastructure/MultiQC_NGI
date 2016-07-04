@@ -21,17 +21,19 @@ was generated and the button that launches the welcome tour.
   {{ ' <br><small>'+report.ngi['customer_project_reference']+'</small></h1>' if 'customer_project_reference' in report.ngi != None }}
 </h1>
 
-<dl class="dl-horizontal">
-  {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi }}
-  {{ '<dt>Application Type:</dt><dd>'+report.ngi['application']+'</dd>' if 'application' in report.ngi }}
-  {{ '<dt>Project Type:</dt><dd>'+report.ngi['project_type']+'</dd>' if 'project_type' in report.ngi }}
-  {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
-  {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
-</dl>
+<div class="well">
+  <dl class="dl-horizontal" style="margin-bottom:0;">
+    {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi }}
+    {{ '<dt>Application Type:</dt><dd>'+report.ngi['application']+'</dd>' if 'application' in report.ngi }}
+    {{ '<dt>Project Type:</dt><dd>'+report.ngi['project_type']+'</dd>' if 'project_type' in report.ngi }}
+    {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
+    {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
+  </dl>
+</div>
 
 <div id="analysis_dirs_wrapper">
   <p>Report generated on {{ config.creation_date }} based on data in:
-  {% if config.analysis_dir | length == 1 %}<code class="mqc_analysis_path">{{ config.analysis_dir[0] }}</code>  
+  {% if config.analysis_dir | length == 1 %}<code class="mqc_analysis_path">{{ config.analysis_dir[0] }}</code>
   {% else %}
   <ul>
     {% for d in config.analysis_dir %}
@@ -42,8 +44,8 @@ was generated and the button that launches the welcome tour.
 </div>
 
 <div class="btn-group" role="group" id="ngi_name_switch">
-  <button id="ngi_s_names" type="button" class="btn btn-default active">NGI names</button>
-  <button id="ngi_user_s_names" type="button" class="btn btn-default">User supplied names</button>
+  <button id="ngi_s_names" type="button" class="btn btn-primary active"><span class="glyphicon glyphicon-home"></span> NGI names</button>
+  <button id="ngi_user_s_names" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-user"></span> User supplied names</button>
 </div>
 <script type="text/javascript">
 $(function(){
