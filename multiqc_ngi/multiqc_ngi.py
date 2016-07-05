@@ -213,7 +213,7 @@ class ngi_after_modules():
                 report.ngi['sample_meta'] = p_samples.rows[0]['value']
         
         report.ngi['ngi_names'] = dict()
-        for s_name, s in report.ngi['sample_meta'].items():
+        for s_name, s in report.ngi.get('sample_meta', {}).items():
             report.ngi['ngi_names'][s_name] = s['customer_name']
         report.ngi['ngi_names_json'] = json.dumps(report.ngi['ngi_names'], indent=4)
 
