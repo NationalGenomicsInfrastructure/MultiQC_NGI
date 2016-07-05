@@ -12,5 +12,5 @@ install:
 # command to run tests
 script:
   - multiqc data -t ngi
-  - multiqc data -f -t ngi --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json
-  - multiqc data -f -t genstat --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json
+  - multiqc data/MultiQC_TestData-master/data/ngi -f -t ngi --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json
+  - multiqc data/MultiQC_TestData-master/data/ngi -f -t genstat --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json

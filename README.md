@@ -38,6 +38,9 @@ There are two new command line flags introduced by the plugin:
   * Specify a Project ID number, instead of automatically searching for one in sample names
 * `--push/--no-push`
   * Override the config file default for whether to push results to StatusDB.
+* `--test-db`
+  * Specify a JSON file to use for testing instead of StatusDB. For example,
+  [this one](https://github.com/ewels/MultiQC_TestData/blob/master/data/ngi/ngi_db_data.json)
 
 ## Configuration
 The MultiQC_NGI plugin has some configuration options which you can add to the main
@@ -59,8 +62,13 @@ python setup.py develop
 ```
 
 ### Changelog
-#### v0.2dev
-_..nothing yet.._
+#### [v0.2](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2) - 2016-07-05
+* Ability to test using a static JSON file instead of statusdb
+* Compatability with new MultiQC features (eg. ENV vars)
+* WGS-specific cleaning of reports (remove FastQC and FastQ Screen from general stats table)
+* Got the RNA-seq MDS plot to work
+* Made code more tolerant of missing statusdb values
+* Lots of minor bug fixes
 
 #### [v0.1](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.1) - 2016-05-17
 Initial release.
