@@ -10,7 +10,7 @@ For more information about MultiQC, see http://multiqc.info
 
 from setuptools import setup, find_packages
 
-version = '0.2'
+version = '0.3dev'
 
 setup(
     name = 'multiqc_ngi',
@@ -41,7 +41,8 @@ setup(
         ],
         'multiqc.cli_options.v1': [
             'project = multiqc_ngi.cli:pid_option',
-            'push_statusdb = multiqc_ngi.cli:push_flag'
+            'push_statusdb = multiqc_ngi.cli:push_flag',
+            'test_db = multiqc_ngi.cli:test_db'
         ],
         'multiqc.hooks.v1': [
             'after_modules = multiqc_ngi.multiqc_ngi:ngi_after_modules'

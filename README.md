@@ -10,12 +10,50 @@ For more information about NGI, see http://www.scilifelab.se/platforms/ngi/
 
 For more information about MultiQC, see http://multiqc.info
 
-## Contents
+## Description
+### Templates
 This plugin provides two extra templates - `ngi` and `genstat`. `ngi` is a
 stand-alone template, much like the default MultiQC template but with additional
 branding. `genstat` produces a template suitable for `tornado`, allowing reports
 to be directly integrated into our internal sample tracking website,
-[Genomics Status](https://github.com/SciLifeLab/genomics-status).
+[Genomics Status](https://github.com/SciLifeLab/genomics-status). Both are able
+to print data specific to this plugin (see below).
+
+### Modules
+This plugin has one additional module - `ngi_rnaseq`. This reads data files
+produced by our [RNA pipeline](https://github.com/SciLifeLab/NGI-RNAseq)
+in a custom R script (`process sample_correlation`). It plots a heatmap of sample
+similarity distances and an MDS plot.
+
+### Database Integration
+This plugin connects MultiQC to our internal sample tracking database,
+[statusdb](https://github.com/SciLifeLab/statusdb).
+
+Firstly, it retrieves information from statusdb to put into the report:
+
+1. Looks at sample names in the General Stats table for something that looks like
+   an NGI project number (_eg._ `P1234`). Bails if none or more than one are found.
+2. Connects to statusdb and searches projects for this. Bails if not found.
+3. Retrieves project level information to be printed at the top of the report
+   (`ngi` template only).
+4. Goes through general stats table looking for sample identifiers (`P1234_001`)
+5. Searches statusdb for each of these and tries to pull interesting fields if possible:
+  * Initial QC RIN score
+  * Amount of sample taken for library prep
+  * Concentration of prepared library
+    * _NB:_ These are skipped if multiple library preps are found.
+
+Secondly, it can push data from MultiQC back to statusdb. This is very helpful
+as it allows us to do cross-project meta analyses, tracking the bioinformatics
+statistics across everything we run.
+
+1. If all of the above has worked, we already know the project and sample IDs
+2. Either pushes or updates records in the `analysis` database, using data saved
+   by all MultiQC modules available in `report.saved_raw_data`
+
+This is dependent on either `--push` or `config.push_statusdb` being true, so
+doesn't run by default.
+
 
 ## Installation
 To run this tool, you must have MultiQC installed. You can install both
@@ -50,6 +88,14 @@ They are (with default values):
 disable_ngi: False          # Disable the MultiQC_NGI hooks
 push_statusdb: False        # Enable pushing to StatusDB by default.
 ```
+
+## Code structure
+The new modules and templates are held in `multiqc_ngi/`. The code that interacts
+with statusdb is in `multiqc_ngi/multiqc_ngi.py` and the new command line options
+are defined in `multiqc_ngi/cli.py`.
+
+The way that all of these plugin functions work is defined in `setup.py`, in the
+`entry_points` section.
 
 ## Development
 If you're developing this code, you'll want to clone it locally and install

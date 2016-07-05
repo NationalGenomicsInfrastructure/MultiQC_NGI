@@ -12,7 +12,7 @@ push_flag = click.option('--push/--no-push', 'push_statusdb',
     default = None,
     help = 'Push / do not push MultiQC results to StatusDB analysis db. Overrides config option push_statusdb'
 )
-push_flag = click.option('--test-db', 'test_database',
+test_db = click.option('--test-db', 'test_database',
     default = None,
     help = "Path to a static file to use for testing instead of StatusDB. Useful for testing when the NGI database isn't accessible."
 )
