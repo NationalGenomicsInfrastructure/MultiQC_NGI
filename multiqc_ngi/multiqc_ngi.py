@@ -31,13 +31,6 @@ class ngi_after_modules():
         # Check that these hooks haven't been disabled in the config file
         if getattr(config, 'disable_ngi', False) is True:
             return None
-
-        if 'DuplicationMetrics' in report.data_sources.get('Picard', {}).keys() and 'FastQC' in report.data_sources.keys():
-            for idx, mod in enumerate(report.general_stats_headers):
-                if 'percent_duplicates' in mod.keys() and 'avg_sequence_length' in mod.keys():
-                    report.general_stats_headers[idx]['percent_duplicates']['hidden'] = True
-                    log.debug('Hiding FastQC % dups in General Stats as we have Picard MarkDups as well.')
-                    break
         
         # Run WGS Piper specific cleanup
         for f in report.files:
