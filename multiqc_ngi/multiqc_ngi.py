@@ -28,6 +28,9 @@ class ngi_after_modules():
     
     def __init__(self):
         
+        # Flags - overwritten when stuff works
+        report.ngi['ngi_header'] = False
+        
         # Check that these hooks haven't been disabled in the config file
         if getattr(config, 'disable_ngi', False) is True:
             return None
@@ -38,9 +41,19 @@ class ngi_after_modules():
                 self.ngi_wgs_cleanup()
                 break
         
-        # Connect to StatusDB
-        self.couch = self.connect_statusdb()
-        if self.couch is not None:
+        # Are we using the dummy test data?
+        self.couch = None
+        self.test_data = None
+        if 'test_database' in config.kwargs and config.kwargs['test_database'] is not None:
+            log.info("Using test data instead of connecting to StatusDB: {}".format(config.kwargs['test_database']))
+            with open(config.kwargs['test_database'], 'r') as tdata:
+                self.test_data = json.loads(tdata.read())
+        else:
+            # Connect to StatusDB
+            self.couch = self.connect_statusdb()
+        
+        # Load and process the data
+        if self.couch is not None or self.test_data is not None:
             
             # Get project ID
             pid = None
@@ -133,24 +146,26 @@ class ngi_after_modules():
 
     def get_ngi_project_metadata(self, pid):
         """ Get project metadata from statusdb """
-        if self.couch is None:
-            return None
-        try:
-            p_view = self.couch['projects'].view('project/summary')
-        except socket.error:
-            log.error('CouchDB Operation timed out')
-        p_summary = None
-        for row in p_view:
-            if row['key'][1] == pid:
-                p_summary = row
-        
-        try:
-            p_summary = p_summary['value']
-        except TypeError:
-            log.error("statusdb returned no rows when querying {}".format(pid))
-            return None
-        
-        log.debug("Found metadata for NGI project '{}'".format(p_summary['project_name']))
+        if self.test_data is not None:
+            p_summary = self.test_data['summary']
+        else:
+            if self.couch is None:
+                return None
+            try:
+                p_view = self.couch['projects'].view('project/summary')
+            except socket.error:
+                log.error('CouchDB Operation timed out')
+            p_summary = None
+            for row in p_view:
+                if row['key'][1] == pid:
+                    p_summary = row
+            
+            try:
+                p_summary = p_summary['value']
+            except TypeError:
+                log.error("statusdb returned no rows when querying {}".format(pid))
+                return None
+            log.debug("Found metadata for NGI project '{}'".format(p_summary['project_name']))
         
         config.title = '{}: {}'.format(pid, p_summary['project_name'])
         config.project_name = p_summary['project_name']
@@ -174,28 +189,33 @@ class ngi_after_modules():
         for i, j in keys.items():
             try:
                 report.ngi[i] = p_summary[j]
+                report.ngi['ngi_header'] = True
             except KeyError:
                 log.warn("Couldn't find '{}' in project summary".format(j))
         for i, j in d_keys.items():
             try:
                 report.ngi[i] = p_summary['details'][j]
+                report.ngi['ngi_header'] = True
             except KeyError:
                 log.warn("Couldn't find '{}' in project details".format(j))
 
 
     def get_ngi_samples_metadata(self, pid):
         """ Get project sample metadata from statusdb """
-        if self.couch is not None:
+        if self.test_data is not None:
+            report.ngi['sample_meta'] = self.test_data['samples']
+        elif self.couch is not None:
             p_view = self.couch['projects'].view('project/samples')
             p_samples = p_view[pid]
             if not len(p_samples.rows) == 1:
                 log.error("statusdb returned {} rows when querying {}".format(len(p_samples.rows), pid))
             else:
                 report.ngi['sample_meta'] = p_samples.rows[0]['value']
-                report.ngi['ngi_names'] = dict()
-                for s_name, s in report.ngi['sample_meta'].items():
-                    report.ngi['ngi_names'][s_name] = s['customer_name']
-                report.ngi['ngi_names_json'] = json.dumps(report.ngi['ngi_names'], indent=4)
+        
+        report.ngi['ngi_names'] = dict()
+        for s_name, s in report.ngi['sample_meta'].items():
+            report.ngi['ngi_names'][s_name] = s['customer_name']
+        report.ngi['ngi_names_json'] = json.dumps(report.ngi['ngi_names'], indent=4)
 
 
     def general_stats_sample_meta(self):
@@ -254,7 +274,7 @@ class ngi_after_modules():
                         except KeyError:
                             pass
                         try:
-                            for lv in sorted(meta[sid]['library_prep'][lp]['library_validation'].keys()): 
+                            for lv in sorted(meta[sid]['library_prep'][lp]['library_validation'].keys()):
                                 gsdata[s_name]['lp_concentration'] = meta[sid]['library_prep'][lp]['library_validation'][lv]['concentration']
                                 formats[s_name] = meta[sid]['library_prep'][lp]['library_validation'][lv]['conc_units']
                         except KeyError:
@@ -391,21 +411,21 @@ class ngi_after_modules():
         try:
             conf_file = os.path.join(os.environ.get('HOME'), '.ngi_config', 'statusdb.yaml')
             with open(conf_file, "r") as f:
-                config = yaml.load(f)
+                sdb_config = yaml.load(f)
         except IOError:
             log.debug("Could not open the MultiQC_NGI statusdb config file {}".format(conf_file))
             try:
                 with open(os.environ['STATUS_DB_CONFIG'], "r") as f:
-                    config = yaml.load(f)
+                    sdb_config = yaml.load(f)
             except (KeyError, IOError):
                 log.debug("Could not get the MultiQC_NGI statusdb config file from env STATUS_DB_CONFIG")
                 log.warn("Could not find a statusdb config file")
                 return None
         try:
-            couch_user = config['statusdb']['username']
-            password = config['statusdb']['password']
-            couch_url = config['statusdb']['url']
-            port = config['statusdb']['port']
+            couch_user = sdb_config['statusdb']['username']
+            password = sdb_config['statusdb']['password']
+            couch_url = sdb_config['statusdb']['url']
+            port = sdb_config['statusdb']['port']
         except KeyError:
             log.error("Error parsing the config file {}".format(conf_file))
             return None

@@ -21,6 +21,7 @@ was generated and the button that launches the welcome tour.
   {{ ' <br><small>'+report.ngi['customer_project_reference']+'</small></h1>' if 'customer_project_reference' in report.ngi != None }}
 </h1>
 
+{% if report.ngi['ngi_header'] %}
 <div class="well">
   <dl class="dl-horizontal" style="margin-bottom:0;">
     {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi }}
@@ -30,6 +31,7 @@ was generated and the button that launches the welcome tour.
     {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
   </dl>
 </div>
+{% endif %}
 
 <div id="analysis_dirs_wrapper">
   <p>Report generated on {{ config.creation_date }} based on data in:
@@ -43,8 +45,9 @@ was generated and the button that launches the welcome tour.
   {% endif %}
 </div>
 
+{% if report.ngi.get('ngi_names_json', {}) | length > 0 %}
 <div class="btn-group" role="group" id="ngi_name_switch">
-  <button id="ngi_s_names" type="button" class="btn btn-primary active"><span class="glyphicon glyphicon-home"></span> NGI names</button>
+  <button id="ngi_s_names" type="button" class="btn btn-primary active"><span class="glyphicon glyphicon-list"></span> NGI names</button>
   <button id="ngi_user_s_names" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-user"></span> User supplied names</button>
 </div>
 <script type="text/javascript">
@@ -72,6 +75,7 @@ $(function(){
 });
 </script>
 {{ report.ngi_names_js }}
+{% endif %}
 
 <hr>
 

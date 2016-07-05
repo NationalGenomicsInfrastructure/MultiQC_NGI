@@ -7,9 +7,10 @@ python:
 install:
   - pip install git+git://github.com/ewels/MultiQC.git
   - python setup.py -q install
-  - git clone https://github.com/ewels/MultiQC_TestData.git test_data
-  - cd test_data
+  - wget https://github.com/ewels/MultiQC_TestData/archive/master.zip
+  - unzip master.zip -d data
 # command to run tests
 script:
   - multiqc data -t ngi
-  - multiqc data -f -t genstat
+  - multiqc data -f -t ngi --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json
+  - multiqc data -f -t genstat --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json
