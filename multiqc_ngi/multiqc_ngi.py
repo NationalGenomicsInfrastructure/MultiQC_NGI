@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """ MultiQC hook functions - we tie into the MultiQC
 core here to add in extra functionality. """
@@ -16,6 +15,9 @@ import socket
 import sys
 import yaml
 
+from pkg_resources import get_distribution
+__version__ = get_distribution("multiqc_ngi").version
+
 import multiqc
 from multiqc.utils import report, util_functions, config
 
@@ -28,61 +30,72 @@ class ngi_after_modules():
     
     def __init__(self):
         
-        # Flags - overwritten when stuff works
-        report.ngi['ngi_header'] = False
+        log.debug("Running MultiQC_NGI v{}".format(__version__))
         
-        # Check that these hooks haven't been disabled in the config file
-        if getattr(config, 'disable_ngi', False) is True:
-            return None
-        
-        # Run WGS Piper specific cleanup
-        for f in report.files:
-            if 'piper_ngi' in f['root'].split(os.sep):
-                self.ngi_wgs_cleanup()
-                break
-        
-        # Are we using the dummy test data?
-        self.couch = None
-        self.test_data = None
-        if 'test_database' in config.kwargs and config.kwargs['test_database'] is not None:
-            log.info("Using test data instead of connecting to StatusDB: {}".format(config.kwargs['test_database']))
-            with open(config.kwargs['test_database'], 'r') as tdata:
-                self.test_data = json.loads(tdata.read())
-        else:
-            # Connect to StatusDB
-            self.couch = self.connect_statusdb()
-        
-        # Load and process the data
-        if self.couch is not None or self.test_data is not None:
+        # Global try statement to catch any unhandled exceptions and stop MultiQC from crashing
+        try:
             
-            # Get project ID
-            pid = None
-            if 'project' in config.kwargs and config.kwargs['project'] is not None:
-                log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
-                pid = config.kwargs['project']
-                self.s_names = set()
-                for x in report.general_stats_data:
-                    self.s_names.update(x.keys())
+            # Flags - overwritten when stuff works
+            report.ngi['ngi_header'] = False
+            
+            # Check that these hooks haven't been disabled in the config file
+            if getattr(config, 'disable_ngi', False) is True:
+                return None
+            
+            # Run WGS Piper specific cleanup
+            for f in report.files:
+                if 'piper_ngi' in f['root'].split(os.sep):
+                    log.info("Looks like WGS data - cleaning up report")
+                    self.ngi_wgs_cleanup()
+                    break
+            
+            # Are we using the dummy test data?
+            self.couch = None
+            self.test_data = None
+            if 'test_database' in config.kwargs and config.kwargs['test_database'] is not None:
+                log.info("Using test data instead of connecting to StatusDB: {}".format(config.kwargs['test_database']))
+                with open(config.kwargs['test_database'], 'r') as tdata:
+                    self.test_data = json.loads(tdata.read())
             else:
-                pid = self.find_ngi_project()
+                # Connect to StatusDB
+                self.couch = self.connect_statusdb()
             
-            if pid is not None:
-                # Get the metadata for the project
-                self.get_ngi_project_metadata(pid)
-                self.get_ngi_samples_metadata(pid)
+            # Load and process the data
+            if self.couch is not None or self.test_data is not None:
                 
-                # Add to General Stats table
-                self.general_stats_sample_meta()
-                
-                # Push MultiQC data to StatusDB
-                if getattr(config, 'push_statusdb', None) is None:
-                    config.push_statusdb = False
-                if config.kwargs.get('push_statusdb', None) is not None:
-                    config.push_statusdb = config.kwargs['push_statusdb']
-                if config.push_statusdb:
-                    self.push_statusdb_multiqc_data()
+                # Get project ID
+                pid = None
+                if 'project' in config.kwargs and config.kwargs['project'] is not None:
+                    log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
+                    pid = config.kwargs['project']
+                    self.s_names = set()
+                    for x in report.general_stats_data:
+                        self.s_names.update(x.keys())
                 else:
-                    log.info("Not pushing results to StatusDB. To do this, use --push or set config push_statusdb: True")
+                    pid = self.find_ngi_project()
+                
+                if pid is not None:
+                    # Get the metadata for the project
+                    self.get_ngi_project_metadata(pid)
+                    self.get_ngi_samples_metadata(pid)
+                    
+                    # Add to General Stats table
+                    self.general_stats_sample_meta()
+                    
+                    # Push MultiQC data to StatusDB
+                    if getattr(config, 'push_statusdb', None) is None:
+                        config.push_statusdb = False
+                    if config.kwargs.get('push_statusdb', None) is not None:
+                        config.push_statusdb = config.kwargs['push_statusdb']
+                    if config.push_statusdb:
+                        self.push_statusdb_multiqc_data()
+                    else:
+                        log.info("Not pushing results to StatusDB. To do this, use --push or set config push_statusdb: True")
+        
+        except Exception as e:
+            log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
+            log.exception(e)
+            log.error("Continuing with base MultiQC execution.")
 
 
     def ngi_wgs_cleanup(self):
@@ -214,7 +227,7 @@ class ngi_after_modules():
         
         report.ngi['ngi_names'] = dict()
         for s_name, s in report.ngi.get('sample_meta', {}).items():
-            report.ngi['ngi_names'][s_name] = s['customer_name']
+            report.ngi['ngi_names'][s_name] = s.get('customer_name', '???')
         report.ngi['ngi_names_json'] = json.dumps(report.ngi['ngi_names'], indent=4)
 
 
