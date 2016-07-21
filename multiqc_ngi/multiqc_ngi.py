@@ -264,7 +264,7 @@ class ngi_after_modules():
                     log.debug("Skipping StatusDB metadata for sample {} as no bioinfo report logs found.".format(sid))
                     continue
                 
-                # Create a dict with the data that we want
+                # Make a dict to hold new data for General Stats
                 gsdata[s_name] = dict()
                 
                 # NGI name
@@ -302,6 +302,8 @@ class ngi_after_modules():
                         pass
             
             log.info("Matched {} samples from StatusDB with report sample names".format(len(s_names)))
+            if len(s_names) == 0:
+                return None
             
             # Deal with having more than one initial QC concentration unit
             formats_set = set(formats.values())
