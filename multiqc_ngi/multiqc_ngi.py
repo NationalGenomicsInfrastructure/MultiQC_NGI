@@ -232,128 +232,145 @@ class ngi_after_modules():
 
 
     def general_stats_sample_meta(self):
-            """ Add metadata about each sample to the General Stats table """
+        """ Add metadata about each sample to the General Stats table """
+        
+        meta = report.ngi.get('sample_meta')
+        if meta is not None and len(meta) > 0:
             
-            meta = report.ngi.get('sample_meta')
-            if meta is not None and len(meta) > 0:
+            log.info('Found {} samples in StatusDB'.format(len(meta)))
+            
+            # Write to file
+            util_functions.write_data_file(meta, 'ngi_meta')
+            
+            # Add to General Stats table
+            gsdata = dict()
+            formats = dict()
+            s_names = dict()
+            ngi_ids = dict()
+            conc_units = ''
+            for sid in meta:
                 
-                log.info('Found {} samples in StatusDB'.format(len(meta)))
+                # Find first sample name matching this sample ID
+                s_name = None
+                for x in sorted(self.s_names):
+                    if sid in x:
+                        s_name = x
+                        s_names[s_name] = x
+                        ngi_ids[s_name] = sid
+                        break
                 
-                # Write to file
-                util_functions.write_data_file(meta, 'ngi_meta')
+                # Skip this sample if we don't have any matching data
+                if s_name is None:
+                    log.debug("Skipping StatusDB metadata for sample {} as no bioinfo report logs found.".format(sid))
+                    continue
                 
-                # Add to General Stats table
-                gsdata = dict()
-                formats = dict()
-                s_names = dict()
-                conc_units = ''
-                for sid in meta:
-                    # Find first sample name matching this sample ID
-                    s_name = None
-                    for x in sorted(self.s_names):
-                        if sid in x:
-                            s_name = x
-                            s_names[s_name] = x
-                            break
-                    
-                    # Skip this sample if we don't have any matching data
-                    if s_name is None:
-                        log.debug("Skipping StatusDB metadata for sample {} as no bioinfo report logs found.".format(sid))
-                        continue
-                    
-                    # Create a dict with the data that we want
-                    gsdata[s_name] = dict()
+                # Create a dict with the data that we want
+                gsdata[s_name] = dict()
+                
+                # NGI name
+                gsdata[s_name]['user_sample_name'] = report.ngi['ngi_names'][ngi_ids[s_name]]
+                
+                # RIN score
+                try:
+                    gsdata[s_name]['initial_qc_rin'] = meta[sid]['initial_qc']['rin']
+                except KeyError:
+                    pass
+                
+                # Try to figure out which library prep was used
+                seq_lp = None
+                for lp in sorted(meta[sid].get('library_prep', {}).keys()):
                     try:
-                        gsdata[s_name]['initial_qc_rin'] = meta[sid]['initial_qc']['rin']
+                        if len(meta[sid]['library_prep'][lp]['sample_run_metrics']) > 0:
+                            if seq_lp is None:
+                                seq_lp = lp
+                            else:
+                                seq_lp = None
+                                log.warn('Found multiple sequenced lib preps for {} - skipping metadata'.format(sid))
+                                break
                     except KeyError:
                         pass
-                    
-                    # Try to figure out which library prep was used
-                    seq_lp = None
-                    for lp in sorted(meta[sid].get('library_prep', {}).keys()):
-                        try:
-                            if len(meta[sid]['library_prep'][lp]['sample_run_metrics']) > 0:
-                                if seq_lp is None:
-                                    seq_lp = lp
-                                else:
-                                    seq_lp = None
-                                    log.warn('Found multiple sequenced lib preps for {} - skipping metadata'.format(sid))
-                                    break
-                        except KeyError:
-                            pass
-                    if seq_lp is not None:
-                        try:
-                            gsdata[s_name]['amount_taken'] = meta[sid]['library_prep'][lp]['amount_taken_(ng)']
-                        except KeyError:
-                            pass
-                        try:
-                            for lv in sorted(meta[sid]['library_prep'][lp]['library_validation'].keys()):
-                                gsdata[s_name]['lp_concentration'] = meta[sid]['library_prep'][lp]['library_validation'][lv]['concentration']
-                                formats[s_name] = meta[sid]['library_prep'][lp]['library_validation'][lv]['conc_units']
-                        except KeyError:
-                            pass
-                
-                log.info("Matched {} samples from StatusDB with report sample names".format(len(s_names)))
-                
-                # Deal with having more than one initial QC concentration unit
-                formats_set = set(formats.values())
-                if len(formats_set) > 1:
-                    log.warning("Mixture of library_validation concentration units! Found: {}".format(", ".join(formats_set)))
-                    for s_name in gsdata:
-                        try:
-                            gsdata[s_name]['lp_concentration'] = '{} {}'.format(gsdata[s_name]['lp_concentration'], formats[s_name])
-                        except KeyError:
-                            pass
-                elif len(formats_set) == 1:
-                    conc_units = formats_set.pop()
-                
-                # Decide on whether to show or hide conc & amount taken based on range
-                conc_hidden = True
-                amounts_hidden = True
-                try:
-                    concs = [gsdata[x]['lp_concentration'] for x in gsdata]
-                    if max(concs) - min(concs) > 50:
-                        conc_hidden = False
-                except (KeyError, ValueError):
+                if seq_lp is not None:
+                    try:
+                        gsdata[s_name]['amount_taken'] = meta[sid]['library_prep'][lp]['amount_taken_(ng)']
+                    except KeyError:
+                        pass
+                    try:
+                        for lv in sorted(meta[sid]['library_prep'][lp]['library_validation'].keys()):
+                            gsdata[s_name]['lp_concentration'] = meta[sid]['library_prep'][lp]['library_validation'][lv]['concentration']
+                            formats[s_name] = meta[sid]['library_prep'][lp]['library_validation'][lv]['conc_units']
+                    except KeyError:
+                        pass
+            
+            log.info("Matched {} samples from StatusDB with report sample names".format(len(s_names)))
+            
+            # Deal with having more than one initial QC concentration unit
+            formats_set = set(formats.values())
+            if len(formats_set) > 1:
+                log.warning("Mixture of library_validation concentration units! Found: {}".format(", ".join(formats_set)))
+                for s_name in gsdata:
+                    try:
+                        gsdata[s_name]['lp_concentration'] = '{} {}'.format(gsdata[s_name]['lp_concentration'], formats[s_name])
+                    except KeyError:
+                        pass
+            elif len(formats_set) == 1:
+                conc_units = formats_set.pop()
+            
+            # Decide on whether to show or hide conc & amount taken based on range
+            conc_hidden = True
+            amounts_hidden = True
+            try:
+                concs = [gsdata[x]['lp_concentration'] for x in gsdata]
+                if max(concs) - min(concs) > 50:
                     conc_hidden = False
-                try:
-                    amounts = [gsdata[x]['amount_taken'] for x in gsdata]
-                    if max(amounts) - min(amounts) > 10:
-                        amounts_hidden = False
-                except KeyError:
+            except (KeyError, ValueError):
+                conc_hidden = False
+            try:
+                amounts = [gsdata[x]['amount_taken'] for x in gsdata]
+                if max(amounts) - min(amounts) > 10:
                     amounts_hidden = False
-                
-                gsheaders = OrderedDict()
-                gsheaders['initial_qc_rin'] = {
-                    'namespace': 'NGI',
-                    'title': 'RIN',
-                    'description': 'Initial QC: RNA Integrity Number',
-                    'min': 0,
-                    'max': 10,
-                    'scale': 'YlGn',
-                    'format': '{:.2f}'
-                }
-                gsheaders['lp_concentration'] = {
-                    'namespace': 'NGI',
-                    'title': 'Lib Conc. ({})'.format(conc_units),
-                    'description': 'Library Prep: Concentration ({})'.format(conc_units),
-                    'min': 0,
-                    'scale': 'YlGn',
-                    'format': '{:.0f}',
-                    'hidden': conc_hidden
-                }
-                gsheaders['amount_taken'] = {
-                    'namespace': 'NGI',
-                    'title': 'Amount Taken (ng)',
-                    'description': 'Library Prep: Amount Taken (ng)',
-                    'min': 0,
-                    'scale': 'YlGn',
-                    'format': '{:.0f}',
-                    'hidden': amounts_hidden
-                }
-                
-                report.general_stats_data.append(gsdata)
-                report.general_stats_headers.append(gsheaders)
+            except KeyError:
+                amounts_hidden = False
+            
+            gsheaders = OrderedDict()
+            gsheaders['initial_qc_rin'] = {
+                'namespace': 'NGI',
+                'title': 'RIN',
+                'description': 'Initial QC: RNA Integrity Number',
+                'min': 0,
+                'max': 10,
+                'scale': 'YlGn',
+                'format': '{:.2f}'
+            }
+            gsheaders['lp_concentration'] = {
+                'namespace': 'NGI',
+                'title': 'Lib Conc. ({})'.format(conc_units),
+                'description': 'Library Prep: Concentration ({})'.format(conc_units),
+                'min': 0,
+                'scale': 'YlGn',
+                'format': '{:.0f}',
+                'hidden': conc_hidden
+            }
+            gsheaders['amount_taken'] = {
+                'namespace': 'NGI',
+                'title': 'Amount Taken (ng)',
+                'description': 'Library Prep: Amount Taken (ng)',
+                'min': 0,
+                'scale': 'YlGn',
+                'format': '{:.0f}',
+                'hidden': amounts_hidden
+            }
+            
+            gsheaders_prepend = OrderedDict()
+            gsheaders_prepend['user_sample_name'] = {
+                'namespace': 'NGI',
+                'title': 'Name',
+                'description': 'User sample ID'
+            }
+            
+            report.general_stats_data.append(gsdata)
+            report.general_stats_headers.append(gsheaders)
+            report.general_stats_data.insert(0, gsdata)
+            report.general_stats_headers.insert(0, gsheaders_prepend)
     
     
     def push_statusdb_multiqc_data(self):
