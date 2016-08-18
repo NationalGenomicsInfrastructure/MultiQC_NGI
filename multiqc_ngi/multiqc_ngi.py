@@ -38,8 +38,14 @@ class ngi_after_modules():
             # Flags - overwritten when stuff works
             report.ngi['ngi_header'] = False
             
+            # Check that we're not ignoring NGI module with a command line flag
+            if config.kwargs.get('disable_ngi', False) is True:
+                log.info("Skipping MultiQC_NGI as specified on command line")
+                return None
+            
             # Check that these hooks haven't been disabled in the config file
             if getattr(config, 'disable_ngi', False) is True:
+                log.debug("Skipping MultiQC_NGI as specified in config file")
                 return None
             
             # Run WGS Piper specific cleanup
@@ -333,6 +339,18 @@ class ngi_after_modules():
             except KeyError:
                 amounts_hidden = False
             
+            # Prepend columns to the General Stats table (far left)
+            gsheaders_prepend = OrderedDict()
+            gsheaders_prepend['user_sample_name'] = {
+                'namespace': 'NGI',
+                'title': 'Name',
+                'description': 'User sample ID',
+                'scale': False
+            }
+            report.general_stats_data.insert(0, gsdata)
+            report.general_stats_headers.insert(0, gsheaders_prepend)
+            
+            # Add columns to the far right of the General Stats table
             gsheaders = OrderedDict()
             gsheaders['initial_qc_rin'] = {
                 'namespace': 'NGI',
@@ -361,18 +379,9 @@ class ngi_after_modules():
                 'format': '{:.0f}',
                 'hidden': amounts_hidden
             }
-            
-            gsheaders_prepend = OrderedDict()
-            gsheaders_prepend['user_sample_name'] = {
-                'namespace': 'NGI',
-                'title': 'Name',
-                'description': 'User sample ID'
-            }
-            
             report.general_stats_data.append(gsdata)
             report.general_stats_headers.append(gsheaders)
-            report.general_stats_data.insert(0, gsdata)
-            report.general_stats_headers.insert(0, gsheaders_prepend)
+            
     
     
     def push_statusdb_multiqc_data(self):

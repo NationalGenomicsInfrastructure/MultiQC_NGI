@@ -40,6 +40,7 @@ setup(
             'genstat = multiqc_ngi.templates.genstat',
         ],
         'multiqc.cli_options.v1': [
+            'disable = multiqc_ngi.cli:disable_ngi',
             'project = multiqc_ngi.cli:pid_option',
             'push_statusdb = multiqc_ngi.cli:push_flag',
             'test_db = multiqc_ngi.cli:test_db'

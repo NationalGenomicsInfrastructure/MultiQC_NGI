@@ -4,6 +4,10 @@ core here and add some new command line parameters. """
 
 import click
 
+disable_ngi = click.option('--disable-ngi', 'disable_ngi',
+    is_flag = True,
+    help = "Disable the MultiQC_NGI plugin on this run"
+)
 pid_option = click.option('--project',
     type = str,
     help = 'Manually specify a project in StatusDB instead of detecting automatically'
