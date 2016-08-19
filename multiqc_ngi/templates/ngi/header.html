@@ -21,6 +21,10 @@ was generated and the button that launches the welcome tour.
   {{ ' <br><small>'+report.ngi['customer_project_reference']+'</small></h1>' if 'customer_project_reference' in report.ngi != None }}
 </h1>
 
+{% if config.report_comment and config.report_comment | length > 0 %}
+<blockquote class="report_comment">{{ config.report_comment }}</blockquote>
+{% endif %}
+
 {% if report.ngi['ngi_header'] %}
 <div class="well">
   <dl class="dl-horizontal" style="margin-bottom:0;">
