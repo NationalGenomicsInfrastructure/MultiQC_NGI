@@ -33,7 +33,8 @@ setup(
     ],
     entry_points = {
         'multiqc.modules.v1': [
-            'ngi_rnaseq = multiqc_ngi.modules.ngi_rnaseq:MultiqcModule'
+            'ngi_rnaseq = multiqc_ngi.modules.ngi_rnaseq:MultiqcModule',
+            'featureCounts_biotype = multiqc_ngi.modules.featureCounts_biotype:MultiqcModule'
         ],
         'multiqc.templates.v1': [
             'ngi = multiqc_ngi.templates.ngi',
