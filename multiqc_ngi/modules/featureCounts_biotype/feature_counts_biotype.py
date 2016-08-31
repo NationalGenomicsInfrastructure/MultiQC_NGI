@@ -9,15 +9,15 @@ import logging
 from multiqc import config, BaseMultiqcModule, plots
 
 # Initialise the logger
-log = logging.getLogger(__name__)
+log = logging.getLogger('multiqc')
 
 class MultiqcModule(BaseMultiqcModule):
 
     def __init__(self):
 
         # Initialise the parent object
-        super(MultiqcModule, self).__init__(name='featureCounts_biotype',
-        anchor='featurecounts-biotype',
+        super(MultiqcModule, self).__init__(name='Biotype Counts',
+        target="featureCounts", anchor='featurecounts',
         href='http://bioinf.wehi.edu.au/featureCounts/',
         info="counts mapped reads overlapping genomic features. "\
         "This plot shows reads overlapping features of different biotypes.")
@@ -26,12 +26,11 @@ class MultiqcModule(BaseMultiqcModule):
         try:
             sp = config.sp['ngi_rnaseq']['featureCounts_biotype']
         except KeyError:
-            sp = {'fn': '*_biotype.featureCounts.txt'}
+            sp = {'fn': '*_biotype_counts.txt'}
         
         # Find and load any featureCounts reports
         self.featurecounts_biotype_data = dict()
-        self.featurecounts_keys = list()
-        for f in self.find_log_files(config.sp['featurecounts_biotype']):
+        for f in self.find_log_files(sp):
             self.parse_featurecounts_report(f)
 
         if len(self.featurecounts_biotype_data) == 0:
@@ -57,52 +56,29 @@ class MultiqcModule(BaseMultiqcModule):
         Parse the featureCounts file.
         NB: This is NOT the summary file as in the main featureCounts module.
         """
-        
-        file_names = list()
         parsed_data = dict()
         for l in f['f'].splitlines():
             s = l.split("\t")
-            if len(s) < 6:
-                continue
-            # Don't keep massive lines in memory. Probably doesn't make much difference.
-            del s[1:5]
-            if s[0] == '# Program:featureCounts':
-                for f_name in s[1:]:
-                    file_names.append(f_name)
-            else:
-                k = s[0]
-                parsed_data[k] = list()
-                if k not in self.featurecounts_keys:
-                    self.featurecounts_keys.append(k)
-                for val in s[1:]:
-                    parsed_data[k].append(int(val))
+            try:
+                parsed_data[s[0]] = int(s[1])
+            except (IndexError, ValueError):
+                pass
         
-        suffix = 'Aligned.sortedByCoord.out.bam_biotype.featureCounts.txt'
-        for idx, f_name in enumerate(file_names):
-            
-            # Clean up sample name
-            s_name = self.clean_s_name(f_name, f['root'])
-            if s_name.endswith(suffix):
-                s_name = s_name[:-len(suffix)]
-            
-            # Reorganised parsed data for this sample
-            # Collect total count number
-            data = dict()
-            data['Total'] = 0
-            for k in parsed_data:
-                data[k] = parsed_data[k][idx]
-                data['Total'] += parsed_data[k][idx]
-            
-            # Calculate the percent aligned if we can
-            if 'rRNA' in data:
-                data['percent_rRNA'] = (float(data['rRNA'])/float(data['Total'])) * 100.0
-            
-            # Add to the main dictionary
-            if len(data) > 1:
-                if s_name in self.featurecounts_biotype_data:
-                    log.debug("Duplicate sample name found! Overwriting: {}".format(s_name))
-                self.add_data_source(f, s_name)
-                self.featurecounts_biotype_data[s_name] = data
+        # Collect total count number
+        total_count = 0
+        for k in parsed_data:
+            total_count += parsed_data[k]
+        
+        # Calculate the percent aligned if we can
+        if 'rRNA' in parsed_data:
+            parsed_data['percent_rRNA'] = (float(parsed_data['rRNA'])/float(total_count)) * 100.0
+        
+        # Add to the main dictionary
+        if len(parsed_data) > 1:
+            if f['s_name'] in self.featurecounts_biotype_data:
+                log.debug("Duplicate sample name found! Overwriting: {}".format(f['s_name']))
+            self.add_data_source(f, f['s_name'])
+            self.featurecounts_biotype_data[f['s_name']] = parsed_data
         
 
     def featurecounts_biotypes_stats_table(self):
@@ -117,7 +93,7 @@ class MultiqcModule(BaseMultiqcModule):
             'min': 0,
             'suffix': '%',
             'scale': 'RdYlGn-rev',
-            'format': '{:.1f}%'
+            'format': '{:.2f}%'
         }
         self.general_stats_addcols(self.featurecounts_biotype_data, headers)
 
@@ -125,12 +101,21 @@ class MultiqcModule(BaseMultiqcModule):
     def featureCounts_biotypes_chart (self):
         """ Make the featureCounts assignment rates plot """
         
+        # Order keys by count in first dataset
+        keys = OrderedDict()
+        for d in self.featurecounts_biotype_data.values():
+            for k in sorted(d, key=d.get, reverse=True):
+                if k == 'percent_rRNA':
+                    continue
+                keys[k] = {'name': k.replace('_', ' ') }
+            break
+        
         # Config for the plot
-        config = {
+        pconfig = {
             'id': 'featureCounts_biotype_plot',
             'title': 'featureCounts Biotypes',
             'ylab': '# Reads',
             'cpswitch_counts_label': 'Number of Reads'
         }
         
-        return plots.bargraph.plot(self.featurecounts_biotype_data, self.featurecounts_keys, config)
+        return plots.bargraph.plot(self.featurecounts_biotype_data, keys, pconfig)

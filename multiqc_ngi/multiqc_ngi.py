@@ -297,7 +297,8 @@ class ngi_after_modules():
                         pass
                 if seq_lp is not None:
                     try:
-                        gsdata[s_name]['amount_taken'] = meta[sid]['library_prep'][lp]['amount_taken_(ng)']
+                        if meta[sid]['library_prep'][lp]['amount_taken_(ng)'] is not None:
+                            gsdata[s_name]['amount_taken'] = meta[sid]['library_prep'][lp]['amount_taken_(ng)']
                     except KeyError:
                         pass
                     try:
