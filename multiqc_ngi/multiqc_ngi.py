@@ -70,17 +70,20 @@ class ngi_after_modules():
             if self.couch is not None or self.test_data is not None:
                 
                 # Get project ID
-                pid = None
+                pids = None
                 if 'project' in config.kwargs and config.kwargs['project'] is not None:
                     log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
-                    pid = config.kwargs['project']
+                    pids = config.kwargs['project']
                     self.s_names = set()
                     for x in report.general_stats_data:
                         self.s_names.update(x.keys())
                 else:
-                    pid = self.find_ngi_project()
+                    pids = self.find_ngi_project()
                 
-                if pid is not None:
+                if len(pids) == 1:
+                    pid = pids.keys()[0]
+                    log.info("Found one NGI project id: {}".format(pid))
+
                     # Get the metadata for the project
                     self.get_ngi_project_metadata(pid)
                     self.get_ngi_samples_metadata(pid)
@@ -97,6 +100,15 @@ class ngi_after_modules():
                         self.push_statusdb_multiqc_data()
                     else:
                         log.info("Not pushing results to StatusDB. To do this, use --push or set config push_statusdb: True")
+
+                elif len(pids) > 1:
+                    log.info("Found {} NGI project IDs: {}".format(len(pids), ", ".join(pids)))
+                    for pid, s_names in pids.items():
+                        self.get_ngi_samples_metadata(pid, s_names)
+                    self.general_stats_sample_meta()
+                else:
+                    log.info("No NGI project IDs found.")
+                
         
         except Exception as e:
             log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
@@ -146,21 +158,15 @@ class ngi_after_modules():
             self.s_names.update(x.keys())
         for d in report.saved_raw_data.values():
             self.s_names.update(d.keys())
-        pids = set()
+        pids = dict()
         for s_name in self.s_names:
             m = re.search(r'(P\d{3,5})', s_name)
             if m:
-                pids.add(m.group(1))
-        if len(pids) == 1:
-            pid = pids.pop()
-            log.info("Found one NGI project id: {}".format(pid))
-            return pid
-        elif len(pids) > 1:
-            log.warn("Multiple NGI project IDs found! {}".format(",".join(pids)))
-            return None
-        else:
-            log.info("No NGI project IDs found.")
-            return None
+                try:
+                    pids[m.group(1)].append(s_name)
+                except KeyError:
+                    pids[m.group(1)] = [s_name]
+        return pids
 
 
     def get_ngi_project_metadata(self, pid):
@@ -219,7 +225,7 @@ class ngi_after_modules():
                 log.warn("Couldn't find '{}' in project details".format(j))
 
 
-    def get_ngi_samples_metadata(self, pid):
+    def get_ngi_samples_metadata(self, pid, s_names=None):
         """ Get project sample metadata from statusdb """
         if self.test_data is not None:
             report.ngi['sample_meta'] = self.test_data['samples']
@@ -229,9 +235,12 @@ class ngi_after_modules():
             if not len(p_samples.rows) == 1:
                 log.error("statusdb returned {} rows when querying {}".format(len(p_samples.rows), pid))
             else:
-                report.ngi['sample_meta'] = p_samples.rows[0]['value']
+                if 'sample_meta' not in report.ngi:
+                    report.ngi['sample_meta'] = dict()
+                report.ngi['sample_meta'].update(p_samples.rows[0]['value'])
         
-        report.ngi['ngi_names'] = dict()
+        if 'ngi_names' not in report.ngi:
+            report.ngi['ngi_names'] = dict()
         for s_name, s in report.ngi.get('sample_meta', {}).items():
             report.ngi['ngi_names'][s_name] = s.get('customer_name', '???')
         report.ngi['ngi_names_json'] = json.dumps(report.ngi['ngi_names'], indent=4)
@@ -274,7 +283,10 @@ class ngi_after_modules():
                 gsdata[s_name] = dict()
                 
                 # NGI name
-                gsdata[s_name]['user_sample_name'] = report.ngi['ngi_names'][ngi_ids[s_name]]
+                try:
+                    gsdata[s_name]['user_sample_name'] = report.ngi['ngi_names'][ngi_ids[s_name]]
+                except KeyError:
+                    pass
                 
                 # RIN score
                 try:
@@ -308,7 +320,7 @@ class ngi_after_modules():
                     except KeyError:
                         pass
             
-            log.info("Matched {} samples from StatusDB with report sample names".format(len(s_names)))
+            log.info("Matched meta for {} samples from StatusDB with report sample names".format(len(s_names)))
             if len(s_names) == 0:
                 return None
             
