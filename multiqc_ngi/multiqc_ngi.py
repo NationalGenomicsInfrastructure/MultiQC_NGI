@@ -12,6 +12,7 @@ import re
 import requests
 import shutil
 import socket
+import subprocess
 import sys
 import yaml
 
@@ -26,11 +27,11 @@ log = logging.getLogger('multiqc')
 report.ngi = dict()
 
 # NGI specific code to run after the modules have finished
-class ngi_after_modules():
+class ngi_metadata():
     
     def __init__(self):
         
-        log.debug("Running MultiQC_NGI v{}".format(__version__))
+        log.debug("Running MultiQC_NGI v{} (after modules)".format(__version__))
         
         # Global try statement to catch any unhandled exceptions and stop MultiQC from crashing
         try:
@@ -157,7 +158,10 @@ class ngi_after_modules():
         for x in report.general_stats_data:
             self.s_names.update(x.keys())
         for d in report.saved_raw_data.values():
-            self.s_names.update(d.keys())
+            try:
+                self.s_names.update(d.keys())
+            except AttributeError:
+                pass
         pids = dict()
         for s_name in self.s_names:
             m = re.search(r'(P\d{3,5})', s_name)
@@ -494,3 +498,38 @@ class ngi_after_modules():
             return None
         
         return Server(server_url)
+
+
+
+# NGI code to run once the report is finished and has been written to disk
+class ngi_after_execution_finish():
+    
+    def __init__(self):
+        log.debug("Running MultiQC_NGI v{} (after execution finish)".format(__version__))
+        
+        if config.kwargs.get('disable_ngi', False) is True:
+            log.debug("Skipping MultiQC_NGI (after execution finish) as 'disable_ngi' was specified")
+            return None
+        
+        # Global try statement to catch any unhandled exceptions and stop MultiQC from crashing
+        try:
+            
+            # Copy finished reports to remote server
+            if getattr(config, 'save_remote', False) is True:
+                log.info("Saving report to remote server...")
+                try:
+                    DEVNULL = open(os.devnull, 'wb')
+                    p = subprocess.Popen(
+                        ['scp', '-P', config.remote_port, config.output_fn, config.remote_destination],
+                        stdout=DEVNULL
+                    )
+                    pid, exit_status = os.waitpid(p.pid, 0)
+                    if exit_status != 0:
+                        log.error("Not able to copy report to remote server: Subprocess command failed.")
+                except TypeError: #AttributeError:
+                    log.error("Not able to copy report to remote server.".format())
+            
+        except Exception as e:
+            log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
+            log.exception(e)
+            log.error("Continuing with base MultiQC execution.")

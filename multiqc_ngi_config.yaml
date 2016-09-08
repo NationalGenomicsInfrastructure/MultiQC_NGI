@@ -21,3 +21,7 @@ fn_ignore_paths:
     - '*/piper_ngi/02_preliminary_alignment_qc/*'
     - '*/piper_ngi/03_genotype_concordance/*'
     - '*/piper_ngi/04_merged_alignments/*'
+
+save_remote: True
+remote_port: '5912'
+remote_destination: 'genomics.www@tools.scilifelab.se:/var/local/mqc_reports/'

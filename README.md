@@ -19,13 +19,18 @@ to be directly integrated into our internal sample tracking website,
 [Genomics Status](https://github.com/SciLifeLab/genomics-status). Both are able
 to print data specific to this plugin (see below).
 
-### Modules
-This plugin has one additional module - `ngi_rnaseq`. This reads data files
-produced by our [RNA pipeline](https://github.com/SciLifeLab/NGI-RNAseq)
+### Modules
+#### ngi_rnaseq
+This module reads data files produced by our [RNA pipeline](https://github.com/SciLifeLab/NGI-RNAseq)
 in a custom R script (`process sample_correlation`). It plots a heatmap of sample
 similarity distances and an MDS plot.
 
-### Database Integration
+#### featureCounts_biotype
+This module picks up summary statistics from featureCounts about the overlap
+counts of different gene biotypes (including rRNA). These files are generated
+by our [RNA pipeline](https://github.com/SciLifeLab/NGI-RNAseq).
+
+### Pulling from StatusDB
 This plugin connects MultiQC to our internal sample tracking database,
 [statusdb](https://github.com/SciLifeLab/statusdb).
 
@@ -43,17 +48,23 @@ Firstly, it retrieves information from statusdb to put into the report:
   * Concentration of prepared library
     * _NB:_ These are skipped if multiple library preps are found.
 
-Secondly, it can push data from MultiQC back to statusdb. This is very helpful
+### Pushing to StatusDB
+As well as retrieving data, MultiQC_NGI can push data back to statusdb. This is helpful
 as it allows us to do cross-project meta analyses, tracking the bioinformatics
 statistics across everything we run.
 
-1. If all of the above has worked, we already know the project and sample IDs
+1. If pulling data has worked, we already know the project and sample IDs
 2. Either pushes or updates records in the `analysis` database, using data saved
    by all MultiQC modules available in `report.saved_raw_data`
 
-This is dependent on either `--push` or `config.push_statusdb` being true, so
+This is dependent on either `--push` or `config.push_statusdb` being `true`, so
 doesn't run by default.
 
+### Saving reports to a server
+Once the MultiQC report is complete and has been saved to disk, MultiQC_NGI can
+transfer the report to a remote server by using the `scp` command. We use this
+to store reports in a central backed up location. Once there, we are able to
+integrate them into our sample tracking website.
 
 ## Installation
 To run this tool, you must have MultiQC installed. You can install both
@@ -79,15 +90,16 @@ There are two new command line flags introduced by the plugin:
 * `--test-db`
   * Specify a JSON file to use for testing instead of StatusDB. For example,
   [this one](https://github.com/ewels/MultiQC_TestData/blob/master/data/ngi/ngi_db_data.json)
+* `--disable-ngi`
+  * Disable the MultiQC_NGI plugin for this run
 
 ## Configuration
 The MultiQC_NGI plugin has some configuration options which you can add to the main
-MultiQC config files (`inst_dir/multiqc_config.yaml`, `~/.multiqc_config.yaml` and `./multiqc_config.yaml`).
-They are (with default values):
-```yaml
-disable_ngi: False          # Disable the MultiQC_NGI hooks
-push_statusdb: False        # Enable pushing to StatusDB by default.
-```
+MultiQC config files (`inst_dir/multiqc_config.yaml`, `~/.multiqc_config.yaml` and 
+`./multiqc_config.yaml`).
+
+The available config options with some suggested values can be found in
+[`multiqc_ngi_config.yaml`](multiqc_ngi_config.yaml)
 
 ## Code structure
 The new modules and templates are held in `multiqc_ngi/`. The code that interacts
@@ -108,6 +120,12 @@ python setup.py develop
 ```
 
 ### Changelog
+### v0.3dev
+* New featureCounts biotype plot / rRNA in General Stats table
+* Reports now able to send to a remote server
+* Metadata for samples still retrieved when multiple project IDs found
+
+
 #### [v0.2](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2) - 2016-07-05
 * Ability to test using a static JSON file instead of statusdb
 * Compatability with new MultiQC features (eg. ENV vars)

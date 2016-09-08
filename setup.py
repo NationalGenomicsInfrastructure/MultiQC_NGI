@@ -47,7 +47,8 @@ setup(
             'test_db = multiqc_ngi.cli:test_db'
         ],
         'multiqc.hooks.v1': [
-            'after_modules = multiqc_ngi.multiqc_ngi:ngi_after_modules'
+            'before_report_generation = multiqc_ngi.multiqc_ngi:ngi_metadata',
+            'execution_finish = multiqc_ngi.multiqc_ngi:ngi_after_execution_finish'
         ]
     },
     classifiers = [
