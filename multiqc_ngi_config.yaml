@@ -23,5 +23,6 @@ fn_ignore_paths:
     - '*/piper_ngi/04_merged_alignments/*'
 
 save_remote: True
-remote_port: '5912'
+remote_sshkey: '~/.ssh/id_rsa'  # Optional
+remote_port: '5912'             # Optional
 remote_destination: 'genomics.www@tools.scilifelab.se:/var/local/mqc_reports/'

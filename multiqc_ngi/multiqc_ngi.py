@@ -516,18 +516,18 @@ class ngi_after_execution_finish():
             
             # Copy finished reports to remote server
             if getattr(config, 'save_remote', False) is True:
-                log.info("Saving report to remote server...")
-                try:
-                    DEVNULL = open(os.devnull, 'wb')
-                    p = subprocess.Popen(
-                        ['scp', '-P', config.remote_port, config.output_fn, config.remote_destination],
-                        stdout=DEVNULL
-                    )
-                    pid, exit_status = os.waitpid(p.pid, 0)
-                    if exit_status != 0:
-                        log.error("Not able to copy report to remote server: Subprocess command failed.")
-                except TypeError: #AttributeError:
-                    log.error("Not able to copy report to remote server.".format())
+                scp_command = ['scp']
+                if getattr(config, 'remote_sshkey', None) is not None:
+                    scp_command.extend(['-i', config.remote_sshkey])
+                if getattr(config, 'remote_port', None) is not None:
+                    scp_command.extend(['-P', config.remote_port])
+                scp_command.extend([config.output_fn, config.remote_destination])
+                log.debug('Transferring report with command: {}'.format(' '.join(scp_command)))
+                DEVNULL = open(os.devnull, 'wb')
+                p = subprocess.Popen(scp_command, stdout=DEVNULL)
+                pid, exit_status = os.waitpid(p.pid, 0)
+                if exit_status != 0:
+                    log.error("Not able to copy report to remote server: Subprocess command failed.")
             
         except Exception as e:
             log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
