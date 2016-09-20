@@ -71,7 +71,7 @@ To run this tool, you must have MultiQC installed. You can install both
 MultiQC and this package with the following command:
 
 ```
-pip install multiqc git+ssh://git@github.com:ewels/MultiQC_NGI.git
+pip install multiqc git+https://github.com/ewels/MultiQC_NGI.git
 ```
 
 ## Usage
