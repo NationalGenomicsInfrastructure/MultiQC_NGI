@@ -63,6 +63,10 @@ class MultiqcModule(BaseMultiqcModule):
                 except (ValueError, IndexError):
                     pass
         
+        if len(self.dupradar_plots) == 0:
+            log.debug("Could not find any reports in {}".format(config.analysis_dir))
+            raise UserWarning
+        
         # Add Int to General Stats table
         
         # Create line plot of GML lines
