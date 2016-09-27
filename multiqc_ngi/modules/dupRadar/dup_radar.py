@@ -20,7 +20,10 @@ class MultiqcModule(BaseMultiqcModule):
         super(MultiqcModule, self).__init__(name='DupRadar',
         target="dupRadar", anchor='dupRadar',
         href='https://www.bioconductor.org/packages/release/bioc/html/dupRadar.html',
-        info="provides duplication rate quality control for RNA-Seq datasets.")
+        info="provides duplication rate quality control for RNA-Seq datasets. "
+             "Highly expressed genes can be expected to have a lot of duplicate reads, "
+             "but high numbers of duplicates at low read counts can indicate low library "
+             "complexity with technical duplication.")
         
         # Find and load any dupRadar int_slope reports
         try:
@@ -38,7 +41,7 @@ class MultiqcModule(BaseMultiqcModule):
                     s_name = self.clean_s_name(m.group(1), f['root'])
                     if s_name not in self.dupradar_stats:
                         self.dupradar_stats[s_name] = dict()
-                    self.dupradar_stats[s_name]['int'] = m.group(2)
+                    self.dupradar_stats[s_name]['dupRadar_int'] = m.group(2)
                 
                 # Slope
                 m = re.search(slope_regex, l)
@@ -46,7 +49,7 @@ class MultiqcModule(BaseMultiqcModule):
                     s_name = self.clean_s_name(m.group(1), f['root'])
                     if s_name not in self.dupradar_stats:
                         self.dupradar_stats[s_name] = dict()
-                    self.dupradar_stats[s_name]['slope'] = m.group(2)
+                    self.dupradar_stats[s_name]['dupRadar_slope'] = m.group(2)
         
         # Find and load any dupRadar GML line plots
         try:
@@ -63,12 +66,62 @@ class MultiqcModule(BaseMultiqcModule):
                 except (ValueError, IndexError):
                     pass
         
-        if len(self.dupradar_plots) == 0:
+        if len(self.dupradar_stats) == 0 and len(self.dupradar_plots):
             log.debug("Could not find any reports in {}".format(config.analysis_dir))
             raise UserWarning
         
+        log.info("Found {} reports".format(max(len(self.dupradar_stats), len(self.dupradar_plots))))
+        
+        # Write parsed report data to a file
+        self.write_data_file(self.dupradar_stats, 'multiqc_dupRadar')
+        
         # Add Int to General Stats table
+        headers = OrderedDict()
+        headers['dupRadar_int'] = {
+            'title': 'dupRadar Int',
+            'description': 'Int (duprate at low read counts)',
+            'min': 0,
+            'scale': 'RdYlGn-rev',
+            'format': '{:.2f}'
+        }
+        self.general_stats_addcols(self.dupradar_stats, headers)
         
         # Create line plot of GML lines
+        # Only one section, so add to the intro
+        pconfig = {
+            'id': 'dupRadar_plot',
+            'title': 'DupRadar General Linear Model',
+            'ylab': '% duplicate reads',
+            'xlab': 'expression (reads/kbp)',
+            'ymax': 100,
+            'ymin': 0,
+            'xLog': True,
+            'tt_label': '<b>{point.x:.0f} reads/kbp</b>: {point.y:,.2f}% duplicates',
+            'xPlotLines': [{
+                'value': 0.5,
+                'color': 'green',
+                'width': 1,
+                'dashStyle': 'LongDash',
+                'label': {
+                    'text': '0.5 RPKM',
+                    'verticalAlign': 'bottom',
+                    'y': -65,
+                    'style': {'color': 'green'}
+                }
+            },{
+                'value': 1000,
+                'color': 'red',
+                'width': 1,
+                'dashStyle': 'LongDash',
+                'label': {
+                    'text': '1 read/bp',
+                    'verticalAlign': 'bottom',
+                    'y': -65,
+                    'style': {'color': 'red'}
+                }
+            }]
+        }
+        
+        self.intro += plots.linegraph.plot(self.dupradar_plots, pconfig)
         
         
