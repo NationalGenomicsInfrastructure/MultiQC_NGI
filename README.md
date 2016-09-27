@@ -120,11 +120,25 @@ python setup.py develop
 ```
 
 ### Changelog
-### v0.3dev
-* New featureCounts biotype plot / rRNA in General Stats table
-* Reports now able to send to a remote server
-* Metadata for samples still retrieved when multiple project IDs found
 
+#### [v0.3](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2) - 2016-09-27
+* New dupRadar module
+  * Takes output from dupRadar script in the [NGI-RNAseq](https://github.com/SciLifeLab/NGI-RNAseq/) pipeline
+* New featureCounts biotype plot / rRNA in General Stats table
+  * Takes output from the [NGI-RNAseq](https://github.com/SciLifeLab/NGI-RNAseq/) pipeline
+    where featureCounts sums the counts for each biotype and plots this
+* Reports now handle multiple projects
+  * No header is added to the top of the report, but other fuctions (eg. sample name swapping) now works
+* Added functionality to copy reports to an external server via `scp` on report completion
+* New General Stats table column - NGI name
+* New command line flag `--disable-ngi`
+
+    
+#### [v0.2.2](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2.2) - 2016-07-08
+* Another bugfix release to handle even more missing information in statusdb
+
+#### [v0.2.1](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2.1) - 2016-07-06
+* Minor bugfix release to handle missing information in statusdb
 
 #### [v0.2](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2) - 2016-07-05
 * Ability to test using a static JSON file instead of statusdb
