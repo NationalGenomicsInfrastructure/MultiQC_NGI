@@ -17,7 +17,7 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Initialise the parent object
         super(MultiqcModule, self).__init__(name='Biotype Counts',
-        target="featureCounts", anchor='featurecounts',
+        target="featureCounts_biotype", anchor='featurecounts_biotype',
         href='http://bioinf.wehi.edu.au/featureCounts/',
         info="counts mapped reads overlapping genomic features. "\
         "This plot shows reads overlapping features of different biotypes.")
