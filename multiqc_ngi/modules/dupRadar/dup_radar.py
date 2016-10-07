@@ -66,7 +66,7 @@ class MultiqcModule(BaseMultiqcModule):
                 except (ValueError, IndexError):
                     pass
         
-        if len(self.dupradar_stats) == 0 and len(self.dupradar_plots):
+        if len(self.dupradar_stats) == 0 and len(self.dupradar_plots) == 0:
             log.debug("Could not find any reports in {}".format(config.analysis_dir))
             raise UserWarning
         
