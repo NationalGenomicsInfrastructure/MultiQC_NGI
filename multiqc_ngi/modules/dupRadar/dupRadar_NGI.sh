@@ -3,7 +3,7 @@
 ########################################
 ##
 ## dupRadar shell script
-## call dupRadar R package from the shell for 
+## call dupRadar R package from the shell for
 ## easy integration into pipelines
 ##
 ## Holger Klein & Sergi Sayols
@@ -54,7 +54,7 @@ outdir   <- gsub("outdir=","",args[5])
 ## number of threads to be used
 threads  <- as.integer(gsub("threads=","",args[6]))
 
-if(length(args) != 6) { 
+if(length(args) != 6) {
   stop (paste0("Usage: ./dupRadar_NGI.sh <file.bam> <genes.gtf> ",
                "<stranded=[no|yes|reverse]> paired=[yes|no] ",
                "outdir=./ threads=1"))
@@ -94,8 +94,8 @@ infs = which(curve_x %in% c(-Inf,Inf))
 curve_x = curve_x[-infs]
 curve_y = curve_y[-infs]
 # Reduce number of data points
-curve_x <- curve_x[seq(1, length(curve_x), 100)]
-curve_y <- curve_y[seq(1, length(curve_y), 100)]
+curve_x <- curve_x[seq(1, length(curve_x), 10)]
+curve_y <- curve_y[seq(1, length(curve_y), 10)]
 # Convert x values back to real counts
 curve_x = 10^curve_x
 # Write to file
