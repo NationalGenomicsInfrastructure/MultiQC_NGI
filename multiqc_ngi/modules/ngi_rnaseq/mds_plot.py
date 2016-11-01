@@ -30,9 +30,9 @@ def parse_reports(self):
     # Go through files and parse data using regexes
     found_mds_plot = False
     data = {}
-    xTitle = None
-    yTitle = None
     for f in self.find_log_files(sp):
+        xTitle = None
+        yTitle = None
         # Parse the file
         for l in f['f'].splitlines():
             s = l.split()
@@ -43,7 +43,7 @@ def parse_reports(self):
                 data[s[0]] = [{'x': float(s[1]), 'y': float(s[2])}]
         # Should only have one MDS plot per report
         if found_mds_plot:
-            log.debug("Duplicate sample name found! Overwriting: {}".format(f['s_name']))
+            log.debug("Found duplicate MDS plots! Overwriting: {}".format(f['s_name']))
         found_mds_plot = True
         self.add_data_source(f, section='mds_plot')
     
