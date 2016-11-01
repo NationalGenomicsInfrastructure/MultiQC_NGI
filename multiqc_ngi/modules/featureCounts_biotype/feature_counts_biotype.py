@@ -104,12 +104,57 @@ class MultiqcModule(BaseMultiqcModule):
         # Order keys by count in first dataset
         keys = OrderedDict()
         for d in self.featurecounts_biotype_data.values():
-            for k in sorted(d, key=d.get, reverse=True):
+            for k in sorted(d):
+                print (k)
                 if k == 'percent_rRNA':
                     continue
                 keys[k] = {'name': k.replace('_', ' ') }
             break
-        
+        keys['protein_coding'] = {
+        'name': 'protein coding'
+        }
+        keys['antisense'] = {
+        'name': 'anti sense'
+        }
+        keys['misc_RNA'] = {
+        'name': 'misc RNA'
+        }
+        keys['lincRNA'] = {
+        'name': 'lincRNA'
+        }
+        keys['pseudogene'] = {
+        'name': 'pseudogene'
+        }
+        keys['processed_transcript'] = {
+        'name': 'processed transcript'
+        }
+        keys['processed_pseudogene'] = {
+        'name': 'processed pseudogene'
+        }
+        keys['sense_intronic'] = {
+        'name': 'sense_intronic'
+        }
+        keys['sense_overlapping'] = {
+        'name': 'sense overlapping'
+        }
+        keys['rRNA'] = {
+        'name': 'rRNA'
+        }
+        keys['snoRNA'] = {
+        'name': 'snoRNA'
+        }
+        keys['miRNA'] = {
+        'name': 'miRNA'
+        }
+        keys['snRNA'] = {
+        'name': 'snRNA'
+        }
+        keys['Mt_tRNA'] = {
+        'name': 'Mt_tRNA'
+        }
+        keys['Mt_rRNA'] = {
+        'name': 'Mt_rRNA'
+        }
         # Config for the plot
         pconfig = {
             'id': 'featureCounts_biotype_plot',
@@ -118,4 +163,3 @@ class MultiqcModule(BaseMultiqcModule):
             'cpswitch_counts_label': 'Number of Reads'
         }
         
-        return plots.bargraph.plot(self.featurecounts_biotype_data, keys, pconfig)
