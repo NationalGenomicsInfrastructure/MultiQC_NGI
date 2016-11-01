@@ -43,7 +43,7 @@ def parse_reports(self):
                 data[s[0]] = [{'x': float(s[1]), 'y': float(s[2])}]
         # Should only have one MDS plot per report
         if found_mds_plot:
-            log.debug("Found duplicate MDS plots! Overwriting: {}".format(f['s_name']))
+            log.warning("Found duplicate MDS plots! Overwriting: {}".format(f['s_name']))
         found_mds_plot = True
         self.add_data_source(f, section='mds_plot')
     
