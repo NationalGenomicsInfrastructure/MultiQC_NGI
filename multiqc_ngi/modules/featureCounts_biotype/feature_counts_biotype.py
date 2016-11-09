@@ -48,7 +48,7 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Assignment bar plot
         # Only one section, so add to the intro
-        self.intro += self.featureCounts_biotypes_chart()
+        self.intro +=self.featureCounts_biotypes_chart()
 
 
     def parse_featurecounts_report (self, f):
@@ -102,14 +102,14 @@ class MultiqcModule(BaseMultiqcModule):
         """ Make the featureCounts assignment rates plot """
         #Order keys the same everytime
         keys = OrderedDict()
-        fixedorder = ['protein_coding', 'antisense', 'misc_RNA', 'pseudogene', 'processed_transcript', 
+        fixedorder = ['protein_coding','rRNA','miRNA', 'antisense', 'misc_RNA', 'pseudogene', 'processed_transcript', 
                 'processed_transcript', 'processed_pseudogene', 'sense_intronic', 'sense_overlapping',
-                'lincRNA', 'rRNA', 'snoRNA', 'miRNA', 'snRNA']
+                'lincRNA', 'snoRNA', 'snRNA']
         for d in self.featurecounts_biotype_data.values():
             for j in fixedorder:
                 if j in d and j not in keys.keys():
                     keys[j] = {'name': j.replace('_', ' ') }
-            # Order remianing keys by count in first dataset
+            # Order remaining keys by count in first dataset
             for k in sorted(d, key=d.get, reverse=True):
                 if k == 'percent_rRNA':
                     continue
@@ -123,4 +123,4 @@ class MultiqcModule(BaseMultiqcModule):
             'ylab': '# Reads',
             'cpswitch_counts_label': 'Number of Reads'
         }
-        
+        return plots.bargraph.plot(self.featurecounts_biotype_data, keys, pconfig) 
