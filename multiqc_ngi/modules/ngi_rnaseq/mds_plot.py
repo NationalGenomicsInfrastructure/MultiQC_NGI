@@ -16,16 +16,16 @@ log = logging.getLogger('multiqc.modules.ngi_rnaseq')
 
 def parse_reports(self):
     """ Find bamtools stats reports and parse their data """
-    
+
     # Set up vars
     self.mds_plot_data = dict()
-    
+
     # Default search pattern
     try:
         sp = config.sp['ngi_rnaseq']['mds_plot']
     except KeyError:
         sp = {'fn': 'edgeR_MDS_plot_coordinates.txt'}
-    
+
     # Go through files and parse data using regexes
     found_mds_plot = False
     data = {}
@@ -45,7 +45,7 @@ def parse_reports(self):
             log.warning("Found duplicate MDS plots! Overwriting: {}".format(f['s_name']))
         found_mds_plot = True
         self.add_data_source(f, section='mds_plot')
-    
+
     if found_mds_plot:
         pconfig = {
             'title': 'MDS Plot',
@@ -57,7 +57,7 @@ def parse_reports(self):
             'anchor': 'ngi_rnaseq-mds_plot',
             'content': scatter.plot(data, pconfig)
         })
-    
+
     # Return number of samples found
     return 1 if found_mds_plot else 0
-    
+

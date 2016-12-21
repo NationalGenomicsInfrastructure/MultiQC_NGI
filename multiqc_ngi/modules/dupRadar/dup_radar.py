@@ -26,7 +26,7 @@ class MultiqcModule(BaseMultiqcModule):
              "Highly expressed genes can be expected to have a lot of duplicate reads, "
              "but high numbers of duplicates at low read counts can indicate low library "
              "complexity with technical duplication.")
-        
+
         # Find and load any dupRadar int_slope reports
         try:
             intslope_sp = config.sp['ngi_rnaseq']['dupradar_intslope']
@@ -44,7 +44,7 @@ class MultiqcModule(BaseMultiqcModule):
                     if s_name not in self.dupradar_stats:
                         self.dupradar_stats[s_name] = dict()
                     self.dupradar_stats[s_name]['dupRadar_int'] = m.group(2)
-                
+
                 # Slope
                 m = re.search(slope_regex, l)
                 if m:
@@ -52,7 +52,7 @@ class MultiqcModule(BaseMultiqcModule):
                     if s_name not in self.dupradar_stats:
                         self.dupradar_stats[s_name] = dict()
                     self.dupradar_stats[s_name]['dupRadar_slope'] = m.group(2)
-        
+
         # Find and load any dupRadar GML line plots
         try:
             dupradar_line_sp = config.sp['ngi_rnaseq']['dupradar_intslope']
@@ -67,16 +67,16 @@ class MultiqcModule(BaseMultiqcModule):
                     self.dupradar_plots[f['s_name']][float(s[0])] = float(s[1])
                 except (ValueError, IndexError):
                     pass
-        
+
         if len(self.dupradar_stats) == 0 and len(self.dupradar_plots) == 0:
             log.debug("Could not find any reports in {}".format(config.analysis_dir))
             raise UserWarning
-        
+
         log.info("Found {} reports".format(max(len(self.dupradar_stats), len(self.dupradar_plots))))
-        
+
         # Write parsed report data to a file
         self.write_data_file(self.dupradar_stats, 'multiqc_dupRadar')
-        
+
         # Add Int to General Stats table
         headers = OrderedDict()
         headers['dupRadar_int'] = {
@@ -87,7 +87,7 @@ class MultiqcModule(BaseMultiqcModule):
             'format': '{:.2f}'
         }
         self.general_stats_addcols(self.dupradar_stats, headers)
-        
+
         # Create line plot of GML lines
         # Only one section, so add to the intro
         pconfig = {
@@ -123,7 +123,7 @@ class MultiqcModule(BaseMultiqcModule):
                 }
             }]
         }
-        
+
         self.intro += linegraph.plot(self.dupradar_plots, pconfig)
-        
-        
+
+

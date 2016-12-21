@@ -15,16 +15,16 @@ log = logging.getLogger('multiqc.modules.ngi_rnaseq')
 
 def parse_reports(self):
     """ Find bamtools stats reports and parse their data """
-    
+
     # Set up vars
     self.heatmap_data = dict()
-    
+
     # Default search pattern
     try:
         sp = config.sp['ngi_rnaseq']['heatmap']
     except KeyError:
         sp = {'fn': 'log2CPM_sample_distances.txt'}
-    
+
     # Go through files and parse data using regexes
     found_heatmap = False
     for f in self.find_log_files(sp):
@@ -44,7 +44,7 @@ def parse_reports(self):
             log.debug("Duplicate sample name found! Overwriting: {}".format(f['s_name']))
         found_heatmap = True
         self.add_data_source(f, section='heatmap')
-    
+
     if found_heatmap:
         pconfig = {
             'title': 'Sample Distances',
@@ -58,7 +58,7 @@ def parse_reports(self):
                 'Euclidean distances between log<sub>2</sub> normalised CPM values are then calculated and clustered.</p>' +
                 heatmap.plot(data, xcats, ycats, pconfig)
         })
-    
+
     # Return number of samples found
     return 1 if found_heatmap else 0
-    
+

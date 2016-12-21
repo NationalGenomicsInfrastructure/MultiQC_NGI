@@ -30,19 +30,19 @@ class MultiqcModule(BaseMultiqcModule):
         self.general_stats_headers = OrderedDict()
         self.general_stats_data = dict()
         n = dict()
-        
+
         # Call submodule functions
         n['heatmaps'] = heatmap.parse_reports(self)
         if n['heatmaps'] > 0:
             log.info("Found {} heatmaps".format(n['heatmaps']))
-        
+
         n['mds_plot'] = mds_plot.parse_reports(self)
         if n['mds_plot'] > 0:
             log.info("Found {} MDS plots".format(n['mds_plot']))
-        
+
         # Exit if we didn't find anything
         if sum(n.values()) == 0:
             log.debug("Could not find any reports in {}".format(config.analysis_dir))
             raise UserWarning
-        
-        
+
+

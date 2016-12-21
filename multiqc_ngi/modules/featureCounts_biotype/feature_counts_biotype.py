@@ -24,13 +24,13 @@ class MultiqcModule(BaseMultiqcModule):
         href='http://bioinf.wehi.edu.au/featureCounts/',
         info="counts mapped reads overlapping genomic features. "\
         "This plot shows reads overlapping features of different biotypes.")
-        
+
         # NGI specific search pattern
         try:
             sp = config.sp['ngi_rnaseq']['featureCounts_biotype']
         except KeyError:
             sp = {'fn': '*_biotype_counts.txt'}
-        
+
         # Find and load any featureCounts reports
         self.featurecounts_biotype_data = dict()
         for f in self.find_log_files(sp):
@@ -66,28 +66,28 @@ class MultiqcModule(BaseMultiqcModule):
                 parsed_data[s[0]] = int(s[1])
             except (IndexError, ValueError):
                 pass
-        
+
         # Collect total count number
         total_count = 0
         for k in parsed_data:
             total_count += parsed_data[k]
-        
+
         # Calculate the percent aligned if we can
         if 'rRNA' in parsed_data:
             parsed_data['percent_rRNA'] = (float(parsed_data['rRNA'])/float(total_count)) * 100.0
-        
+
         # Add to the main dictionary
         if len(parsed_data) > 1:
             if f['s_name'] in self.featurecounts_biotype_data:
                 log.debug("Duplicate sample name found! Overwriting: {}".format(f['s_name']))
             self.add_data_source(f, f['s_name'])
             self.featurecounts_biotype_data[f['s_name']] = parsed_data
-        
+
 
     def featurecounts_biotypes_stats_table(self):
         """ Take the parsed stats from the featureCounts report and add them to the
         basic stats table at the top of the report """
-        
+
         headers = OrderedDict()
         headers['percent_rRNA'] = {
             'title': '% rRNA',
@@ -105,7 +105,7 @@ class MultiqcModule(BaseMultiqcModule):
         """ Make the featureCounts assignment rates plot """
         #Order keys the same everytime
         keys = OrderedDict()
-        fixedorder = ['protein_coding','rRNA','miRNA', 'antisense', 'misc_RNA', 'pseudogene', 'processed_transcript', 
+        fixedorder = ['protein_coding','rRNA','miRNA', 'antisense', 'misc_RNA', 'pseudogene', 'processed_transcript',
                 'processed_transcript', 'processed_pseudogene', 'sense_intronic', 'sense_overlapping',
                 'lincRNA', 'snoRNA', 'snRNA']
         for d in self.featurecounts_biotype_data.values():
@@ -118,7 +118,7 @@ class MultiqcModule(BaseMultiqcModule):
                     continue
                 keys[k] = {'name': k.replace('_', ' ') }
             break
-      
+
         # Config for the plot
         pconfig = {
             'id': 'featureCounts_biotype_plot',
@@ -126,4 +126,4 @@ class MultiqcModule(BaseMultiqcModule):
             'ylab': '# Reads',
             'cpswitch_counts_label': 'Number of Reads'
         }
-        return bargraph.plot(self.featurecounts_biotype_data, keys, pconfig) 
+        return bargraph.plot(self.featurecounts_biotype_data, keys, pconfig)

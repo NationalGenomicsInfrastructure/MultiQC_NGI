@@ -28,34 +28,34 @@ report.ngi = dict()
 
 # NGI specific code to run after the modules have finished
 class ngi_metadata():
-    
+
     def __init__(self):
-        
+
         log.debug("Running MultiQC_NGI v{} (after modules)".format(__version__))
-        
+
         # Global try statement to catch any unhandled exceptions and stop MultiQC from crashing
         try:
-            
+
             # Flags - overwritten when stuff works
             report.ngi['ngi_header'] = False
-            
+
             # Check that we're not ignoring NGI module with a command line flag
             if config.kwargs.get('disable_ngi', False) is True:
                 log.info("Skipping MultiQC_NGI as specified on command line")
                 return None
-            
+
             # Check that these hooks haven't been disabled in the config file
             if getattr(config, 'disable_ngi', False) is True:
                 log.debug("Skipping MultiQC_NGI as specified in config file")
                 return None
-            
+
             # Run WGS Piper specific cleanup
             for f in report.files:
                 if 'piper_ngi' in f['root'].split(os.sep):
                     log.info("Looks like WGS data - cleaning up report")
                     self.ngi_wgs_cleanup()
                     break
-            
+
             # Are we using the dummy test data?
             self.couch = None
             self.test_data = None
@@ -66,10 +66,10 @@ class ngi_metadata():
             else:
                 # Connect to StatusDB
                 self.couch = self.connect_statusdb()
-            
+
             # Load and process the data
             if self.couch is not None or self.test_data is not None:
-                
+
                 # Get project ID
                 pids = None
                 if 'project' in config.kwargs and config.kwargs['project'] is not None:
@@ -80,7 +80,7 @@ class ngi_metadata():
                         self.s_names.update(x.keys())
                 else:
                     pids = self.find_ngi_project()
-                
+
                 if len(pids) == 1:
                     pid = pids.keys()[0]
                     log.info("Found one NGI project id: {}".format(pid))
@@ -88,10 +88,10 @@ class ngi_metadata():
                     # Get the metadata for the project
                     self.get_ngi_project_metadata(pid)
                     self.get_ngi_samples_metadata(pid)
-                    
+
                     # Add to General Stats table
                     self.general_stats_sample_meta()
-                    
+
                     # Push MultiQC data to StatusDB
                     if getattr(config, 'push_statusdb', None) is None:
                         config.push_statusdb = False
@@ -109,8 +109,8 @@ class ngi_metadata():
                     self.general_stats_sample_meta()
                 else:
                     log.info("No NGI project IDs found.")
-                
-        
+
+
         except Exception as e:
             log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
             log.exception(e)
@@ -135,7 +135,7 @@ class ngi_metadata():
         for i in del_idx:
             del report.general_stats_headers[i]
             del report.general_stats_data[i]
-        
+
         for x, data in enumerate(report.general_stats_data):
             new_d = {}
             for s_name in report.general_stats_data[x].keys():
@@ -145,14 +145,14 @@ class ngi_metadata():
                 else:
                     s = s_name
                 new_d[s] = report.general_stats_data[x][s_name]
-            
+
             report.general_stats_data[x] = new_d
-    
-    
+
+
     def find_ngi_project(self):
         """ Try to find a NGI project ID in the sample names.
         If just one found, add to the report header. """
-        
+
         # Collect sample IDs
         self.s_names = set()
         for x in report.general_stats_data:
@@ -188,21 +188,21 @@ class ngi_metadata():
             for row in p_view:
                 if row['key'][1] == pid:
                     p_summary = row
-            
+
             try:
                 p_summary = p_summary['value']
             except TypeError:
                 log.error("statusdb returned no rows when querying {}".format(pid))
                 return None
             log.debug("Found metadata for NGI project '{}'".format(p_summary['project_name']))
-        
+
         config.title = '{}: {}'.format(pid, p_summary['project_name'])
         config.project_name = p_summary['project_name']
         config.output_fn_name = '{}_{}'.format(p_summary['project_name'], config.output_fn_name)
         config.data_dir_name = '{}_{}'.format(p_summary['project_name'], config.data_dir_name)
         log.debug("Renaming report filename to '{}'".format(config.output_fn_name))
         log.debug("Renaming data directory to '{}'".format(config.data_dir_name))
-        
+
         report.ngi['pid'] = pid
         report.ngi['project_name'] = p_summary['project_name']
         keys = {
@@ -242,7 +242,7 @@ class ngi_metadata():
                 if 'sample_meta' not in report.ngi:
                     report.ngi['sample_meta'] = dict()
                 report.ngi['sample_meta'].update(p_samples.rows[0]['value'])
-        
+
         if 'ngi_names' not in report.ngi:
             report.ngi['ngi_names'] = dict()
         for s_name, s in report.ngi.get('sample_meta', {}).items():
@@ -252,15 +252,15 @@ class ngi_metadata():
 
     def general_stats_sample_meta(self):
         """ Add metadata about each sample to the General Stats table """
-        
+
         meta = report.ngi.get('sample_meta')
         if meta is not None and len(meta) > 0:
-            
+
             log.info('Found {} samples in StatusDB'.format(len(meta)))
-            
+
             # Write to file
             util_functions.write_data_file(meta, 'ngi_meta')
-            
+
             # Add to General Stats table
             gsdata = dict()
             formats = dict()
@@ -268,7 +268,7 @@ class ngi_metadata():
             ngi_ids = dict()
             conc_units = ''
             for sid in meta:
-                
+
                 # Find first sample name matching this sample ID
                 s_name = None
                 for x in sorted(self.s_names):
@@ -277,27 +277,27 @@ class ngi_metadata():
                         s_names[s_name] = x
                         ngi_ids[s_name] = sid
                         break
-                
+
                 # Skip this sample if we don't have any matching data
                 if s_name is None:
                     log.debug("Skipping StatusDB metadata for sample {} as no bioinfo report logs found.".format(sid))
                     continue
-                
+
                 # Make a dict to hold new data for General Stats
                 gsdata[s_name] = dict()
-                
+
                 # NGI name
                 try:
                     gsdata[s_name]['user_sample_name'] = report.ngi['ngi_names'][ngi_ids[s_name]]
                 except KeyError:
                     pass
-                
+
                 # RIN score
                 try:
                     gsdata[s_name]['initial_qc_rin'] = meta[sid]['initial_qc']['rin']
                 except KeyError:
                     pass
-                
+
                 # Try to figure out which library prep was used
                 seq_lp = None
                 for lp in sorted(meta[sid].get('library_prep', {}).keys()):
@@ -323,11 +323,11 @@ class ngi_metadata():
                             formats[s_name] = meta[sid]['library_prep'][lp]['library_validation'][lv]['conc_units']
                     except KeyError:
                         pass
-            
+
             log.info("Matched meta for {} samples from StatusDB with report sample names".format(len(s_names)))
             if len(s_names) == 0:
                 return None
-            
+
             # Deal with having more than one initial QC concentration unit
             formats_set = set(formats.values())
             if len(formats_set) > 1:
@@ -339,7 +339,7 @@ class ngi_metadata():
                         pass
             elif len(formats_set) == 1:
                 conc_units = formats_set.pop()
-            
+
             # Decide on whether to show or hide conc & amount taken based on range
             conc_hidden = True
             amounts_hidden = True
@@ -355,7 +355,7 @@ class ngi_metadata():
                     amounts_hidden = False
             except KeyError:
                 amounts_hidden = False
-            
+
             # Prepend columns to the General Stats table (far left)
             gsheaders_prepend = OrderedDict()
             gsheaders_prepend['user_sample_name'] = {
@@ -366,7 +366,7 @@ class ngi_metadata():
             }
             report.general_stats_data.insert(0, gsdata)
             report.general_stats_headers.insert(0, gsheaders_prepend)
-            
+
             # Add columns to the far right of the General Stats table
             gsheaders = OrderedDict()
             gsheaders['initial_qc_rin'] = {
@@ -398,19 +398,19 @@ class ngi_metadata():
             }
             report.general_stats_data.append(gsdata)
             report.general_stats_headers.append(gsheaders)
-            
-    
-    
+
+
+
     def push_statusdb_multiqc_data(self):
         """ Push data parsed by MultiQC modules to the analysis database
         in statusdb. """
-        
+
         # StatusDB view code for analysis/project_id view:
         # function(doc) {
         #   var project_id=Object.keys(doc.samples)[0].split('_')[0];
         #   emit(project_id, doc);
         # }
-        
+
         # Connect to the analysis database
         if self.couch is None:
             return None
@@ -420,14 +420,14 @@ class ngi_metadata():
         except socket.error:
             log.error('CouchDB Operation timed out')
             return None
-        
+
         # Try to get an existing document if one exists
         doc = {}
         for row in p_view:
             if row['key'] == report.ngi['pid']:
                 doc = row.value
                 break
-        
+
         # Start fresh unless the existing doc looks similar
         newdoc = {
             'entity_type': 'MultiQC_data',
@@ -445,7 +445,7 @@ class ngi_metadata():
                 break
         if doc != newdoc:
             log.info('Updating existing analysis record in StatusDB')
-        
+
         # Add sample metadata to doc
         if 'samples' not in doc:
             doc['samples'] = dict()
@@ -459,10 +459,10 @@ class ngi_metadata():
                 if sid not in doc['samples']:
                     doc['samples'][sid] = dict()
                 doc['samples'][sid][key] = d[s_name]
-        
+
         # Save object to the database
         db.save(doc)
-    
+
 
     def connect_statusdb(self):
         """ Connect to statusdb """
@@ -487,33 +487,33 @@ class ngi_metadata():
         except KeyError:
             log.error("Error parsing the config file {}".format(conf_file))
             return None
-        
+
         server_url = "http://{}:{}@{}:{}".format(couch_user, password, couch_url, port)
-        
+
         # First, test that we can see the server.
         try:
             r = requests.get(server_url, timeout=3)
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             log.warn("Cannot contact statusdb - skipping NGI metadata stuff")
             return None
-        
+
         return Server(server_url)
 
 
 
 # NGI code to run once the report is finished and has been written to disk
 class ngi_after_execution_finish():
-    
+
     def __init__(self):
         log.debug("Running MultiQC_NGI v{} (after execution finish)".format(__version__))
-        
+
         if config.kwargs.get('disable_ngi', False) is True:
             log.debug("Skipping MultiQC_NGI (after execution finish) as 'disable_ngi' was specified")
             return None
-        
+
         # Global try statement to catch any unhandled exceptions and stop MultiQC from crashing
         try:
-            
+
             # Copy finished reports to remote server
             if getattr(config, 'save_remote', False) is True:
                 scp_command = ['scp']
@@ -528,7 +528,7 @@ class ngi_after_execution_finish():
                 pid, exit_status = os.waitpid(p.pid, 0)
                 if exit_status != 0:
                     log.error("Not able to copy report to remote server: Subprocess command failed.")
-            
+
         except Exception as e:
             log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
             log.exception(e)
