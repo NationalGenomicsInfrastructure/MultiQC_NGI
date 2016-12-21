@@ -7,7 +7,9 @@ from collections import OrderedDict
 import logging
 import re
 
-from multiqc import config, BaseMultiqcModule, plots
+from multiqc import config
+from multiqc.plots import linegraph
+from multiqc.modules.base_module import BaseMultiqcModule
 
 # Initialise the logger
 log = logging.getLogger('multiqc')
@@ -122,6 +124,6 @@ class MultiqcModule(BaseMultiqcModule):
             }]
         }
         
-        self.intro += plots.linegraph.plot(self.dupradar_plots, pconfig)
+        self.intro += linegraph.plot(self.dupradar_plots, pconfig)
         
         

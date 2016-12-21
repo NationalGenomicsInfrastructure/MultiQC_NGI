@@ -6,7 +6,10 @@ from __future__ import print_function
 from collections import OrderedDict
 import logging
 
-from multiqc import config, BaseMultiqcModule, plots
+from multiqc import config
+from multiqc.plots import bargraph
+from multiqc.modules.base_module import BaseMultiqcModule
+
 
 # Initialise the logger
 log = logging.getLogger('multiqc')
@@ -123,4 +126,4 @@ class MultiqcModule(BaseMultiqcModule):
             'ylab': '# Reads',
             'cpswitch_counts_label': 'Number of Reads'
         }
-        return plots.bargraph.plot(self.featurecounts_biotype_data, keys, pconfig) 
+        return bargraph.plot(self.featurecounts_biotype_data, keys, pconfig) 
