@@ -88,6 +88,7 @@ class ngi_metadata():
                     # Get the metadata for the project
                     self.get_ngi_project_metadata(pid)
                     self.get_ngi_samples_metadata(pid)
+                    #Find reference genome and append it to the Fastqscreen html
                     self.fastqscreen_genome()
                     
                     # Add to General Stats table
@@ -263,13 +264,13 @@ class ngi_metadata():
                             'GRCh37':'Human',
                             'mm9':'Mouse',
                             'GRCm38':'Mouse',
-                            'sacCer2':'Bakers Yeast',
+                            'sacCer2':'S.Cerevisiae',
                             'canFam3':'C.Familiaris - Dog',
                             'dm3':'D.melanogaster - Fruit fly'
                               }
                     if genome in nice_names.keys():
                           genome = nice_names[genome]
-                    m.intro += '<p class="text-info"> <span class="glyphicon glyphicon-piggy-bank"></span>  The reference genome in Genomic status is {}</p>'.format(genome)
+                    m.intro += '<p style="margin-top:20px;" class="text-info"> <span class="glyphicon glyphicon-piggy-bank"></span>  The reference genome in Genomic status is {}</p>'.format(genome)
 
 
     def general_stats_sample_meta(self):
