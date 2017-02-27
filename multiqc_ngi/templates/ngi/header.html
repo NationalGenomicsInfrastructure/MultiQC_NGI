@@ -33,6 +33,7 @@ was generated and the button that launches the welcome tour.
     {{ '<dt>Project Type:</dt><dd>'+report.ngi['project_type']+'</dd>' if 'project_type' in report.ngi }}
     {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
     {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
+    {{ '<dt>Reference Genome:</dt><dd>'+report.ngi['reference_genome']+'</dd>' if 'reference_genome' in report.ngi }}
   </dl>
 </div>
 {% endif %}
