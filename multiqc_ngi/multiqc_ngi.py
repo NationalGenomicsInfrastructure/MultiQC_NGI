@@ -88,7 +88,8 @@ class ngi_metadata():
                     # Get the metadata for the project
                     self.get_ngi_project_metadata(pid)
                     self.get_ngi_samples_metadata(pid)
-
+                    self.fastqscreen_genome()
+                    
                     # Add to General Stats table
                     self.general_stats_sample_meta()
 
@@ -207,7 +208,8 @@ class ngi_metadata():
         report.ngi['project_name'] = p_summary['project_name']
         keys = {
             'contact_email':'contact',
-            'application': 'application'
+            'application':'application',
+            'reference_genome':'reference_genome'
         }
         d_keys = {
             'customer_project_reference': 'customer_project_reference',
@@ -248,6 +250,26 @@ class ngi_metadata():
         for s_name, s in report.ngi.get('sample_meta', {}).items():
             report.ngi['ngi_names'][s_name] = s.get('customer_name', '???')
         report.ngi['ngi_names_json'] = json.dumps(report.ngi['ngi_names'], indent=4)
+
+
+    def fastqscreen_genome(self):
+        """Add the Refrence genome from statusdb to fastq_screen html"""
+        if report.ngi.get('reference_genome') is not None:
+            for m in report.modules_output:
+                if m.anchor  == 'fastq_screen':
+                    genome=report.ngi['reference_genome']
+                    nice_names = {
+                            'hg19':'Human',
+                            'GRCh37':'Human',
+                            'mm9':'Mouse',
+                            'GRCm38':'Mouse',
+                            'sacCer2':'Bakers Yeast',
+                            'canFam3':'C.Familiaris - Dog',
+                            'dm3':'D.melanogaster - Fruit fly'
+                              }
+                    if genome in nice_names.keys():
+                          genome = nice_names[genome]
+                    m.intro += '<p class="text-info"> <span class="glyphicon glyphicon-piggy-bank"></span>  The reference genome in Genomic status is {}</p>'.format(genome)
 
 
     def general_stats_sample_meta(self):
