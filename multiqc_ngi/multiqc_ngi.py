@@ -216,8 +216,10 @@ class ngi_metadata():
             'customer_project_reference': 'customer_project_reference',
             'project_type': 'type',
             'sequencing_platform': 'sequencing_platform',
-            'sequencing_setup': 'sequencing_setup'
-        }
+            'sequencing_setup': 'sequencing_setup',
+            'library_construction_method':'libprep'
+
+            }
         for i, j in keys.items():
             try:
                 report.ngi[i] = p_summary[j]
