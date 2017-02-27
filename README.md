@@ -119,45 +119,14 @@ cd MultiQC_NGI
 python setup.py develop
 ```
 
-### Changelog
+Note that you can use test data specifically for MultiQC_NGI, found within
+the [MultiQC_TestData](https://github.com/ewels/MultiQC_TestData/tree/master/data/ngi)
+repository.
 
-#### [v0.3](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2) - 2016-09-27
-* New dupRadar module
-  * Takes output from dupRadar script in the [NGI-RNAseq](https://github.com/SciLifeLab/NGI-RNAseq/) pipeline
-* New featureCounts biotype plot / rRNA in General Stats table
-  * Takes output from the [NGI-RNAseq](https://github.com/SciLifeLab/NGI-RNAseq/) pipeline
-    where featureCounts sums the counts for each biotype and plots this
-* Reports now handle multiple projects
-  * No header is added to the top of the report, but other fuctions (eg. sample name swapping) now works
-* Added functionality to copy reports to an external server via `scp` on report completion
-* New General Stats table column - NGI name
-* New command line flag `--disable-ngi`
+This dataset includes a JSON file with contents that emulate statusdb, so
+that these features can be developed locally. To use this, tell MultiQC where to find
+it using the `--test-db` flag:
+```bash
+multiqc data -t ngi --test-db ngi_db_data.json
+```
 
-    
-#### [v0.2.2](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2.2) - 2016-07-08
-* Another bugfix release to handle even more missing information in statusdb
-
-#### [v0.2.1](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2.1) - 2016-07-06
-* Minor bugfix release to handle missing information in statusdb
-
-#### [v0.2](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.2) - 2016-07-05
-* Ability to test using a static JSON file instead of statusdb
-* Compatability with new MultiQC features (eg. ENV vars)
-* WGS-specific cleaning of reports (remove FastQC and FastQ Screen from general stats table)
-* Got the RNA-seq MDS plot to work
-* Made code more tolerant of missing statusdb values
-* Lots of minor bug fixes
-
-#### [v0.1](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.1) - 2016-05-17
-Initial release.
-* Module for NextFlow RNA-Seq BP pipeline
-  * Heatmap of sample correlations
-  * MDS plot
-* Automatically find Project ID from report, or specify with `--project`
-* Pull project and sample metadata from StatusDB
-  * `NGI` template shows project metadata at head of report, plus NGI logo
-  * General Stats columns added for `RIN`, `Library Concentration` and `Library Amount Taken`
-* Push MultiQC report data to StatusDB
-  * `config.push_statusdb` or `--push`/`--no-push`
-* Ability to disable StatusDB interactions with `config.disable_ngi`
-* `genstat` barebones template started, but not complete.
