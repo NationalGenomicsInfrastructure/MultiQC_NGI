@@ -30,11 +30,10 @@ was generated and the button that launches the welcome tour.
   <dl class="dl-horizontal" style="margin-bottom:0;">
     {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi }}
     {{ '<dt>Application Type:</dt><dd>'+report.ngi['application']+'</dd>' if 'application' in report.ngi }}
-    {{ '<dt>Project Type:</dt><dd>'+report.ngi['project_type']+'</dd>' if 'project_type' in report.ngi }}
+    {{ '<dt>Library Method:</dt><dd>'+report.ngi['libprep']+'</dd>' if 'libprep' in report.ngi }}
     {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
     {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
     {{ '<dt>Reference Genome:</dt><dd>'+report.ngi['reference_genome']+'</dd>' if 'reference_genome' in report.ngi }}
-    {{ '<dt>Library Method:</dt><dd>'+report.ngi['libprep']+'</dd>' if 'libprep' in report.ngi }}
   </dl>
 </div>
 {% endif %}
