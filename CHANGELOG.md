@@ -1,6 +1,6 @@
 ### MultiQC_NGI
 
-### v0.4dev
+#### [v0.4](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.4) - 2017-03-28
 * Updated code to work with new import styles in MultiQC v1.0dev
 * Whitespace cleanup
 * Fetch Reference Genome from statusdb
