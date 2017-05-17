@@ -22,18 +22,11 @@ class MultiqcModule(BaseMultiqcModule):
         super(MultiqcModule, self).__init__(name='Biotype Counts',
         target="featureCounts_biotype", anchor='featurecounts_biotype',
         href='http://bioinf.wehi.edu.au/featureCounts/',
-        info="counts mapped reads overlapping genomic features. "\
-        "This plot shows reads overlapping features of different biotypes.")
-
-        # NGI specific search pattern
-        try:
-            sp = config.sp['ngi_rnaseq']['featureCounts_biotype']
-        except KeyError:
-            sp = {'fn': '*_biotype_counts.txt'}
+        info="counts mapped reads overlapping genomic features. ")
 
         # Find and load any featureCounts reports
         self.featurecounts_biotype_data = dict()
-        for f in self.find_log_files(sp):
+        for f in self.find_log_files('ngi_rnaseq/featureCounts_biotype'):
             self.parse_featurecounts_report(f)
 
         if len(self.featurecounts_biotype_data) == 0:
@@ -50,8 +43,10 @@ class MultiqcModule(BaseMultiqcModule):
         self.featurecounts_biotypes_stats_table()
 
         # Assignment bar plot
-        # Only one section, so add to the intro
-        self.intro +=self.featureCounts_biotypes_chart()
+        self.add_section(
+            description = "This plot shows reads overlapping features of different biotypes.",
+            plot = self.featureCounts_biotypes_chart()
+        )
 
 
     def parse_featurecounts_report (self, f):

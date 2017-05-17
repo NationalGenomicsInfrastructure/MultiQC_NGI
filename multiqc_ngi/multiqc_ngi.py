@@ -10,21 +10,31 @@ import json
 import os
 import re
 import requests
-import shutil
 import socket
 import subprocess
-import sys
 import yaml
 
 from pkg_resources import get_distribution
 __version__ = get_distribution("multiqc_ngi").version
 
-import multiqc
 from multiqc.utils import report, util_functions, config
 
 log = logging.getLogger('multiqc')
 
 report.ngi = dict()
+
+# Add default config options for the things that are used in MultiQC_NGI
+def multiqc_ngi_config():
+    """ Set up MultiQC config defaults for this package """
+    ngi_search_patterns = {
+        'ngi_rnaseq/featureCounts_biotype': {'fn': '*_biotype_counts.txt'},
+        'ngi_rnaseq/dupradar_intslope': {'fn': '*intercept_slope.txt'},
+        'ngi_rnaseq/dupradar_gml_intslope': {'fn': '*_duprateExpDensCurve.txt'},
+        'ngi_rnaseq/heatmap': {'fn': 'log2CPM_sample_distances.txt'},
+        'ngi_rnaseq/mds_plot':{'fn': 'edgeR_MDS_plot_coordinates.txt'},
+    }
+    config.update_dict(config.sp, ngi_search_patterns)
+
 
 # NGI specific code to run after the modules have finished
 class ngi_metadata():
@@ -50,8 +60,8 @@ class ngi_metadata():
                 return None
 
             # Run WGS Piper specific cleanup
-            for f in report.files:
-                if 'piper_ngi' in f['root'].split(os.sep):
+            for f in report.searchfiles:
+                if 'piper_ngi' in f[1].split(os.sep):
                     log.info("Looks like WGS data - cleaning up report")
                     self.ngi_wgs_cleanup()
                     break
@@ -88,9 +98,10 @@ class ngi_metadata():
                     # Get the metadata for the project
                     self.get_ngi_project_metadata(pid)
                     self.get_ngi_samples_metadata(pid)
-                    #Find reference genome and append it to the Fastqscreen html
+
+                    # Find reference genome and append it to the Fastqscreen html
                     self.fastqscreen_genome()
-                    
+
                     # Add to General Stats table
                     self.general_stats_sample_meta()
 
@@ -517,7 +528,7 @@ class ngi_metadata():
 
         # First, test that we can see the server.
         try:
-            r = requests.get(server_url, timeout=3)
+            requests.get(server_url, timeout=3)
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
             log.warn("Cannot contact statusdb - skipping NGI metadata stuff")
             return None

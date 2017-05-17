@@ -48,6 +48,7 @@ setup(
             'test_db = multiqc_ngi.cli:test_db'
         ],
         'multiqc.hooks.v1': [
+            'before_config = multiqc_ngi.multiqc_ngi:multiqc_ngi_config',
             'before_report_generation = multiqc_ngi.multiqc_ngi:ngi_metadata',
             'execution_finish = multiqc_ngi.multiqc_ngi:ngi_after_execution_finish'
         ]

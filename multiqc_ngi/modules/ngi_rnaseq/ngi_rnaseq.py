@@ -3,7 +3,6 @@
 """ MultiQC module to parse edgeR sample correlation output from NGI-RNAseq Pipeline """
 
 from __future__ import print_function
-from collections import OrderedDict
 import logging
 
 from multiqc import config
@@ -25,10 +24,7 @@ class MultiqcModule(BaseMultiqcModule):
         href="https://github.com/SciLifeLab/NGI-RNAseq/",
         info=" is a Best Practice analysis pipeline, used at the SciLifeLab National Genomics Infrastructure for RNA-Seq.")
 
-        # Set up class objects to hold parsed data
-        self.sections = list()
-        self.general_stats_headers = OrderedDict()
-        self.general_stats_data = dict()
+        # Count logs found
         n = dict()
 
         # Call submodule functions

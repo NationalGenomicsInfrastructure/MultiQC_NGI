@@ -28,14 +28,10 @@ class MultiqcModule(BaseMultiqcModule):
              "complexity with technical duplication.")
 
         # Find and load any dupRadar int_slope reports
-        try:
-            intslope_sp = config.sp['ngi_rnaseq']['dupradar_intslope']
-        except KeyError:
-            intslope_sp = {'fn': '*intercept_slope.txt'}
         int_regex = r'(.*)- dupRadar Int \(duprate at low read counts\): ([\d\.]+)'
         slope_regex = r'(.*)- dupRadar Sl \(progression of the duplication rate\): ([\d\.]+)'
         self.dupradar_stats = dict()
-        for f in self.find_log_files(intslope_sp):
+        for f in self.find_log_files('ngi_rnaseq/dupradar_intslope'):
             for l in f['f'].splitlines():
                 # Intercept
                 m = re.search(int_regex, l)
@@ -54,12 +50,8 @@ class MultiqcModule(BaseMultiqcModule):
                     self.dupradar_stats[s_name]['dupRadar_slope'] = m.group(2)
 
         # Find and load any dupRadar GML line plots
-        try:
-            dupradar_line_sp = config.sp['ngi_rnaseq']['dupradar_intslope']
-        except KeyError:
-            dupradar_line_sp = {'fn': '*_duprateExpDensCurve.txt'}
         self.dupradar_plots = dict()
-        for f in self.find_log_files(dupradar_line_sp):
+        for f in self.find_log_files('ngi_rnaseq/dupradar_gml_intslope'):
             self.dupradar_plots[f['s_name']] = dict()
             for l in f['f'].splitlines():
                 s = l.split()
@@ -89,7 +81,6 @@ class MultiqcModule(BaseMultiqcModule):
         self.general_stats_addcols(self.dupradar_stats, headers)
 
         # Create line plot of GML lines
-        # Only one section, so add to the intro
         pconfig = {
             'id': 'dupRadar_plot',
             'title': 'DupRadar General Linear Model',
@@ -124,6 +115,10 @@ class MultiqcModule(BaseMultiqcModule):
             }]
         }
 
-        self.intro += linegraph.plot(self.dupradar_plots, pconfig)
+        self.add_section(
+            description = '''This plot shows the general linear models -
+                a summary of the gene duplication distributions.''',
+            plot = linegraph.plot(self.dupradar_plots, pconfig)
+        )
 
 
