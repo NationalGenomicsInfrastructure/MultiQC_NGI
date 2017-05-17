@@ -1,5 +1,8 @@
 ### MultiQC_NGI
 
+#### v0.5dev
+* More updates to match syntax changes in core MultiQC v1.0
+
 #### [v0.4](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.4) - 2017-03-28
 * Updated code to work with new import styles in MultiQC v1.0dev
 * Whitespace cleanup

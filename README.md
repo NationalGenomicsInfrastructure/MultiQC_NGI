@@ -95,7 +95,7 @@ There are two new command line flags introduced by the plugin:
 
 ## Configuration
 The MultiQC_NGI plugin has some configuration options which you can add to the main
-MultiQC config files (`inst_dir/multiqc_config.yaml`, `~/.multiqc_config.yaml` and 
+MultiQC config files (`inst_dir/multiqc_config.yaml`, `~/.multiqc_config.yaml` and
 `./multiqc_config.yaml`).
 
 The available config options with some suggested values can be found in
