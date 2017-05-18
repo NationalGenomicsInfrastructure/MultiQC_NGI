@@ -2,6 +2,10 @@
 
 #### v0.5dev
 * More updates to match syntax changes in core MultiQC v1.0
+  * Moved default config values into the core code
+  * Updated syntax, imports and other things
+* Made the featureCounts_biotype module sum any key that includes `rRNA`
+* Added Swedac logo and NGI accreditation blurb at bottom of `ngi` template.
 
 #### [v0.4](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.4) - 2017-03-28
 * Updated code to work with new import styles in MultiQC v1.0dev

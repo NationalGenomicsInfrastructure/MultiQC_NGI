@@ -6,31 +6,33 @@
 Content for the report footer.
 
 #}
-<div class="well">
-  <p class="small text-muted">
-    <a href="http://search.swedac.se/en/accreditations/1850">
-        <img src="data:image/png;base64,{{ include_file('assets/img/Swedac-logo.png', b64=True) }}"  class="pull-right">
-    </a>
-    The National Genomics Infrastructure is accredited by Swedac. This means that our services are subject to highly stringent quality control procedures, so that you can be sure that your data is of excellent quality.
+
+<a href="http://search.swedac.se/en/accreditations/1850" target="_blank" class="pull-right">
+  <img src="data:image/png;base64,{{ include_file('assets/img/Swedac-logo.png', b64=True) }}">
+</a>
+
+<div style="margin-right: 120px;">
+  <div class="well text-muted">
+      The National Genomics Infrastructure is accredited by
+      <a href="http://search.swedac.se/en/accreditations/1850" target="_blank">Swedac</a>.
+      This means that our services are subject to highly stringent quality control procedures, so that you can be
+      sure that your data is of excellent quality.
+  </div>
+  <p>
+      <a href="http://www.scilifelab.se/" target="_blank" class="pull-right">
+          <img src="data:image/png;base64,{{ include_file('assets/img/SciLifeLab.png', b64=True) }}" style="height:41px;">
+      </a>
+      <strong><a href="http://multiqc.info" target="_blank">MultiQC v{{ config.version }}</a></strong>
+      - Written by <a href="http://phil.ewels.co.uk" target="_blank">Phil Ewels</a>,
+      available on <a href="https://github.com/ewels/MultiQC" target="_blank">GitHub</a>.
+  </p>
+  <p>
+      This report uses <a href="http://www.highcharts.com/" target="_blank">HighCharts</a>,
+      <a href="https://jquery.com/" target="_blank">jQuery</a>,
+      <a href="https://jqueryui.com/" target="_blank">jQuery UI</a>,
+      <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a>,
+      <a href="https://github.com/gka/chroma.js" target="_blank">chroma.js</a>,
+      <a href="https://github.com/eligrey/FileSaver.js" target="_blank">FileSaver.js</a> and
+      <a href="https://clipboardjs.com/" target="_blank">clipboard.js</a>.
   </p>
 </div>
-
-<p>
-    <a href="http://www.scilifelab.se/" target="_blank" class="pull-right">
-        <img src="data:image/png;base64,{{ include_file('assets/img/SciLifeLab.png', b64=True) }}" style="height:41px;">
-    </a>
-    <strong>
-        <a href="http://multiqc.info" target="_blank">MultiQC v{{ config.version }}</a>
-    </strong>
-    - Written by <a href="http://phil.ewels.co.uk" target="_blank">Phil Ewels</a>,
-    available on <a href="https://github.com/ewels/MultiQC" target="_blank">GitHub</a>.
-</p>
-<p>
-    This report uses <a href="http://www.highcharts.com/" target="_blank">HighCharts</a>,
-    <a href="https://jquery.com/" target="_blank">jQuery</a>,
-    <a href="https://jqueryui.com/" target="_blank">jQuery UI</a>,
-    <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a>,
-    <a href="https://github.com/gka/chroma.js" target="_blank">chroma.js</a>,
-    <a href="https://github.com/eligrey/FileSaver.js" target="_blank">FileSaver.js</a> and
-    <a href="https://clipboardjs.com/" target="_blank">clipboard.js</a>.
-</p>
