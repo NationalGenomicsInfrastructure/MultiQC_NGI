@@ -1,5 +1,8 @@
 ### MultiQC_NGI
 
+#### v0.6dev
+_..nothing yet.._
+
 #### [v0.5](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.5) - 2017-05-18
 * More updates to match syntax changes in core MultiQC v1.0
   * Moved default config values into the core code
