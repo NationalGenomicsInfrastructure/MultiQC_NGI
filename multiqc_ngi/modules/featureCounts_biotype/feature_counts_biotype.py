@@ -68,7 +68,7 @@ class MultiqcModule(BaseMultiqcModule):
             total_count += parsed_data[k]
 
         # Calculate the total percent rRNA if we can
-        for k in parsed_data.keys():
+        for k in list(parsed_data.keys()):
             if 'rRNA' in k:
                 parsed_data['total_rRNA'] = float(parsed_data.get('total_rRNA', 0)) + float(parsed_data.get(k, 0))
         if 'total_rRNA' in parsed_data:

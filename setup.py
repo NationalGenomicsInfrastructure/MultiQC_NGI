@@ -29,7 +29,8 @@ setup(
         'couchdb',
         'simplejson',
         'pyyaml',
-        'requests'
+        'requests',
+        'multiqc'
     ],
     entry_points = {
         'multiqc.modules.v1': [
