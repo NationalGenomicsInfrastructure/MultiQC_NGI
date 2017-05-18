@@ -67,9 +67,12 @@ class MultiqcModule(BaseMultiqcModule):
         for k in parsed_data:
             total_count += parsed_data[k]
 
-        # Calculate the percent aligned if we can
-        if 'rRNA' in parsed_data:
-            parsed_data['percent_rRNA'] = (float(parsed_data['rRNA'])/float(total_count)) * 100.0
+        # Calculate the total percent rRNA if we can
+        for k in parsed_data.keys():
+            if 'rRNA' in k:
+                parsed_data['total_rRNA'] = float(parsed_data.get('total_rRNA', 0)) + float(parsed_data.get(k, 0))
+        if 'total_rRNA' in parsed_data:
+            parsed_data['percent_total_rRNA'] = (float(parsed_data['total_rRNA'])/float(total_count)) * 100.0
 
         # Add to the main dictionary
         if len(parsed_data) > 1:
@@ -84,14 +87,14 @@ class MultiqcModule(BaseMultiqcModule):
         basic stats table at the top of the report """
 
         headers = OrderedDict()
-        headers['percent_rRNA'] = {
+        headers['percent_total_rRNA'] = {
             'title': '% rRNA',
             'description': '% reads overlappying ribosomal RNA features',
             'max': 100,
             'min': 0,
             'suffix': '%',
             'scale': 'RdYlGn-rev',
-            'format': '{:.2f}%'
+            'format': '{:,.2f}'
         }
         self.general_stats_addcols(self.featurecounts_biotype_data, headers)
 

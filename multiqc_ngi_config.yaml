@@ -14,25 +14,12 @@
 # Note that you may not need all of this if running personally.
 # Just use the sections that you feel are relevent.
 
-# Use the NGI template by default
-template: 'ngi'
-
 # Push parsed results to StatusDB
-push_statusdb: True
-
-# Additional filename cleaning for NGI pipelines
-extra_fn_clean_exts:
-    - .bowtie_log
-    - .featureCounts
-
-# Ignore intermediate files from WGS Piper results
-fn_ignore_paths:
-    - '*/piper_ngi/01_raw_alignments/*'
-    - '*/piper_ngi/02_preliminary_alignment_qc/*'
-    - '*/piper_ngi/03_genotype_concordance/*'
-    - '*/piper_ngi/04_merged_alignments/*'
+# (True by default)
+push_statusdb: False
 
 # Save generated reports remotely on the tools server
+# (disabled by default)
 save_remote: True
 remote_sshkey: '~/.ssh/id_rsa'  # Optional
 remote_port: '5912'             # Optional

@@ -26,6 +26,8 @@ report.ngi = dict()
 # Add default config options for the things that are used in MultiQC_NGI
 def multiqc_ngi_config():
     """ Set up MultiQC config defaults for this package """
+
+    # Module search patterns
     ngi_search_patterns = {
         'ngi_rnaseq/featureCounts_biotype': {'fn': '*_biotype_counts.txt'},
         'ngi_rnaseq/dupradar_intslope': {'fn': '*intercept_slope.txt'},
@@ -34,6 +36,32 @@ def multiqc_ngi_config():
         'ngi_rnaseq/mds_plot':{'fn': 'edgeR_MDS_plot_coordinates.txt'},
     }
     config.update_dict(config.sp, ngi_search_patterns)
+
+    # Use the NGI template by default
+    config.template = 'ngi'
+
+    # Push parsed results to StatusDB
+    config.push_statusdb = True
+
+    # Additional filename cleaning for NGI pipelines
+    config.fn_clean_exts.extend([
+        '.bowtie_log',
+        '.featureCounts'
+    ])
+
+    # Ignore intermediate files from WGS Piper results
+    config.fn_ignore_paths.extend([
+        '*/piper_ngi/01_raw_alignments/*',
+        '*/piper_ngi/02_preliminary_alignment_qc/*',
+        '*/piper_ngi/03_genotype_concordance/*',
+        '*/piper_ngi/04_merged_alignments/*'
+    ])
+
+    # Save generated reports remotely on the tools server
+    config.save_remote = False
+    config.remote_sshkey = None
+    config.remote_port = None
+    config.remote_destination = None
 
 
 # NGI specific code to run after the modules have finished
@@ -412,7 +440,7 @@ class ngi_metadata():
                 'min': 0,
                 'max': 10,
                 'scale': 'YlGn',
-                'format': '{:.2f}'
+                'format': '{:,.2f}'
             }
             gsheaders['lp_concentration'] = {
                 'namespace': 'NGI',
@@ -420,7 +448,7 @@ class ngi_metadata():
                 'description': 'Library Prep: Concentration ({})'.format(conc_units),
                 'min': 0,
                 'scale': 'YlGn',
-                'format': '{:.0f}',
+                'format': '{:.,0f}',
                 'hidden': conc_hidden
             }
             gsheaders['amount_taken'] = {
@@ -429,7 +457,7 @@ class ngi_metadata():
                 'description': 'Library Prep: Amount Taken (ng)',
                 'min': 0,
                 'scale': 'YlGn',
-                'format': '{:.0f}',
+                'format': '{:.,0f}',
                 'hidden': amounts_hidden
             }
             report.general_stats_data.append(gsdata)

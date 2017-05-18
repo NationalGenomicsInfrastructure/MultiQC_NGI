@@ -36,7 +36,7 @@ class MultiqcModule(BaseMultiqcModule):
                 # Intercept
                 m = re.search(int_regex, l)
                 if m:
-                    s_name = self.clean_s_name(m.group(1), f['root'])
+                    s_name = self.clean_s_name(m.group(1), f['root']).strip()
                     if s_name not in self.dupradar_stats:
                         self.dupradar_stats[s_name] = dict()
                     self.dupradar_stats[s_name]['dupRadar_int'] = m.group(2)
@@ -44,7 +44,7 @@ class MultiqcModule(BaseMultiqcModule):
                 # Slope
                 m = re.search(slope_regex, l)
                 if m:
-                    s_name = self.clean_s_name(m.group(1), f['root'])
+                    s_name = self.clean_s_name(m.group(1), f['root']).strip()
                     if s_name not in self.dupradar_stats:
                         self.dupradar_stats[s_name] = dict()
                     self.dupradar_stats[s_name]['dupRadar_slope'] = m.group(2)
@@ -76,7 +76,7 @@ class MultiqcModule(BaseMultiqcModule):
             'description': 'Int (duprate at low read counts)',
             'min': 0,
             'scale': 'RdYlGn-rev',
-            'format': '{:.2f}'
+            'format': '{:,.2f}'
         }
         self.general_stats_addcols(self.dupradar_stats, headers)
 
