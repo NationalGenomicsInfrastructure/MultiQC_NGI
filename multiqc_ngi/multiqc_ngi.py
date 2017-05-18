@@ -256,7 +256,7 @@ class ngi_metadata():
             'project_type': 'type',
             'sequencing_platform': 'sequencing_platform',
             'sequencing_setup': 'sequencing_setup',
-            'library_construction_method':'libprep'
+            'libprep':'library_construction_method'
 
             }
         for i, j in keys.items():
