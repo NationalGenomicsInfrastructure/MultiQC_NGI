@@ -63,6 +63,9 @@ def multiqc_ngi_config():
     config.remote_port = None
     config.remote_destination = None
 
+    # General MultiQC_NGI options
+    config.disable_ngi = False
+
 
 # NGI specific code to run after the modules have finished
 class ngi_metadata():
