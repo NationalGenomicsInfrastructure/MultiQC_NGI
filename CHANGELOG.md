@@ -1,7 +1,8 @@
 ### MultiQC_NGI
 
 #### v0.6dev
-_..nothing yet.._
+* Added no-javascript warning and loading warning
+* Allowed intro text and `report_header_info` in report if specified.
 
 #### [v0.5](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.5) - 2017-05-18
 * More updates to match syntax changes in core MultiQC v1.0

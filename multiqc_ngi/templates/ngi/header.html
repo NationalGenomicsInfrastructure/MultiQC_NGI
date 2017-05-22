@@ -21,8 +21,22 @@ was generated and the button that launches the welcome tour.
   {{ ' <br><small>'+report.ngi['customer_project_reference']+'</small></h1>' if 'customer_project_reference' in report.ngi != None }}
 </h1>
 
+{% if config.intro_text %}
+<p class="lead">{{ config.intro_text }}</p>
+{% endif %}
+
 {% if config.report_comment and config.report_comment | length > 0 %}
 <blockquote class="report_comment">{{ config.report_comment }}</blockquote>
+{% endif %}
+
+{% if config.report_header_info and config.report_header_info | length > 0 %}
+<div class="well">
+  <dl class="dl-horizontal" style="margin-bottom:0;">
+    {% for d in config.report_header_info %}{% for k, v in d.items() %}
+      <dt>{{ k }}</dt><dd>{{ v }}</dd>
+    {% endfor %}{% endfor %}
+  </dl>
+</div>
 {% endif %}
 
 {% if report.ngi['ngi_header'] %}
@@ -37,6 +51,17 @@ was generated and the button that launches the welcome tour.
   </dl>
 </div>
 {% endif %}
+
+<noscript>
+  <div class="alert alert-danger">
+    <h4>JavaScript Disabled</h4>
+    <p>MultiQC reports use JavaScript for plots and toolbox functions. It looks like
+    you have JavaScript disabled in your web browser. Please note that many of the report
+    functions will not work as intended.</p>
+  </div>
+</noscript>
+
+<div class="alert alert-danger mqc_loading_warning" style="display:none;"><span class="glyphicon glyphicon-time"></span> &nbsp;Loading report..</div>
 
 <div id="analysis_dirs_wrapper">
   <p>Report generated on {{ config.creation_date }} based on data in:
