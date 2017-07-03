@@ -73,7 +73,7 @@ class MultiqcModule(BaseMultiqcModule):
         headers = OrderedDict()
         headers['dupRadar_int'] = {
             'title': 'dupRadar Int',
-            'description': 'Int (duprate at low read counts)',
+            'description': 'Int (duprate at low read counts) Low tech. duplication typically  < 0.5, high duplication > 1',
             'min': 0,
             'scale': 'RdYlGn-rev',
             'format': '{:,.2f}'
