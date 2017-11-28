@@ -3,6 +3,8 @@
 #### v0.6dev
 * Added no-javascript warning and loading warning
 * Allowed intro text and `report_header_info` in report if specified.
+* Removed custom modules for [NGI-RNAseq pipeline](https://github.com/SciLifeLab/NGI-RNAseq)
+  * This output is now parsed using _Custom Content_ by native MultiQC
 
 #### [v0.5](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.5) - 2017-05-18
 * More updates to match syntax changes in core MultiQC v1.0

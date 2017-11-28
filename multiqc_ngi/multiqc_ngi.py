@@ -27,16 +27,6 @@ report.ngi = dict()
 def multiqc_ngi_config():
     """ Set up MultiQC config defaults for this package """
 
-    # Module search patterns
-    ngi_search_patterns = {
-        'ngi_rnaseq/featureCounts_biotype': {'fn': '*_biotype_counts.txt'},
-        'ngi_rnaseq/dupradar_intslope': {'fn': '*intercept_slope.txt'},
-        'ngi_rnaseq/dupradar_gml_intslope': {'fn': '*_duprateExpDensCurve.txt'},
-        'ngi_rnaseq/heatmap': {'fn': 'log2CPM_sample_distances.txt'},
-        'ngi_rnaseq/mds_plot':{'fn': 'edgeR_MDS_plot_coordinates.txt'},
-    }
-    config.update_dict(config.sp, ngi_search_patterns)
-
     # Use the NGI template by default
     config.template = 'ngi'
 
