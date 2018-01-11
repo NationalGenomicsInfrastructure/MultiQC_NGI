@@ -19,17 +19,6 @@ to be directly integrated into our internal sample tracking website,
 [Genomics Status](https://github.com/SciLifeLab/genomics-status). Both are able
 to print data specific to this plugin (see below).
 
-### Modules
-#### ngi_rnaseq
-This module reads data files produced by our [RNA pipeline](https://github.com/SciLifeLab/NGI-RNAseq)
-in a custom R script (`process sample_correlation`). It plots a heatmap of sample
-similarity distances and an MDS plot.
-
-#### featureCounts_biotype
-This module picks up summary statistics from featureCounts about the overlap
-counts of different gene biotypes (including rRNA). These files are generated
-by our [RNA pipeline](https://github.com/SciLifeLab/NGI-RNAseq).
-
 ### Pulling from StatusDB
 This plugin connects MultiQC to our internal sample tracking database,
 [statusdb](https://github.com/SciLifeLab/statusdb).
@@ -102,7 +91,7 @@ The available config options with some suggested values can be found in
 [`multiqc_ngi_config.yaml`](multiqc_ngi_config.yaml)
 
 ## Code structure
-The new modules and templates are held in `multiqc_ngi/`. The code that interacts
+The new templates are held in `multiqc_ngi/`. The code that interacts
 with statusdb is in `multiqc_ngi/multiqc_ngi.py` and the new command line options
 are defined in `multiqc_ngi/cli.py`.
 
@@ -129,4 +118,3 @@ it using the `--test-db` flag:
 ```bash
 multiqc data -t ngi --test-db ngi_db_data.json
 ```
-
