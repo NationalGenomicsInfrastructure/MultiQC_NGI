@@ -1,6 +1,6 @@
 ### MultiQC_NGI
 
-#### v0.6dev
+#### [v0.6](https://github.com/ewels/MultiQC_NGI/releases/tag/v0.6) - 2018-08-29
 * Added no-javascript warning and loading warning
 * Allowed intro text and `report_header_info` in report if specified.
 * Removed custom modules for [NGI-RNAseq pipeline](https://github.com/SciLifeLab/NGI-RNAseq)
