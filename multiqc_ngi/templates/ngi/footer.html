@@ -7,15 +7,30 @@ Content for the report footer.
 
 #}
 
+{% if config.swedac_accredited and config.swedac_location == 'stockholm' %}
 <a href="http://search.swedac.se/en/accreditations/1850" target="_blank" class="pull-right">
-  <img src="data:image/png;base64,{{ include_file('assets/img/Swedac-logo.png', b64=True) }}">
+  <img src="data:image/png;base64,{{ include_file('assets/img/Swedac-logo-stockholm.png', b64=True) }}">
 </a>
+{% endif %}
+{% if config.swedac_accredited and config.swedac_location == 'uppsala' %}
+<a href="http://search.swedac.se/en/accreditations/1239" target="_blank" class="pull-right">
+  <img src="data:image/png;base64,{{ include_file('assets/img/Swedac-logo-uppsala.png', b64=True) }}">
+</a>
+{% endif %}
 
 <div style="margin-right: 120px;">
-  {% if config.swedac_accredited %}
+  {% if config.swedac_accredited and config.swedac_location == 'stockholm' %}
   <div class="well text-muted">
       The National Genomics Infrastructure is accredited by
       <a href="http://search.swedac.se/en/accreditations/1850" target="_blank" style="color:#777;">Swedac</a>.
+      This means that our services are subject to highly stringent quality control procedures, so that you can be
+      sure that your data is of excellent quality.
+  </div>
+  {% endif %}
+  {% if config.swedac_accredited and config.swedac_location == 'uppsala' %}
+  <div class="well text-muted">
+      The National Genomics Infrastructure is accredited by
+      <a href="http://search.swedac.se/en/accreditations/1239" target="_blank" style="color:#777;">Swedac</a>.
       This means that our services are subject to highly stringent quality control procedures, so that you can be
       sure that your data is of excellent quality.
   </div>
