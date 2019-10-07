@@ -526,13 +526,13 @@ class ngi_metadata():
         try:
             conf_file = os.path.join(os.environ.get('HOME'), '.ngi_config', 'statusdb.yaml')
             with open(conf_file, "r") as f:
-                sdb_config = yaml.load(f)
+                sdb_config = yaml.safe_load(f)
                 log.debug("Got MultiQC_NGI statusdb config from the home directory.")
         except IOError:
             log.debug("Could not open the MultiQC_NGI statusdb config file {}".format(conf_file))
             try:
                 with open(os.environ['STATUS_DB_CONFIG'], "r") as f:
-                    sdb_config = yaml.load(f)
+                    sdb_config = yaml.safe_load(f)
                     log.debug("Got MultiQC_NGI statusdb config from $STATUS_DB_CONFIG: {}".format(os.environ['STATUS_DB_CONFIG']))
             except (KeyError, IOError):
                 log.debug("Could not get the MultiQC_NGI statusdb config file from env STATUS_DB_CONFIG")

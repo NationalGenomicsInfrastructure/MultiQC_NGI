@@ -10,7 +10,7 @@ For more information about MultiQC, see http://multiqc.info
 
 from setuptools import setup, find_packages
 
-version = '0.6'
+version = '0.6.3'
 
 setup(
     name = 'multiqc_ngi',
