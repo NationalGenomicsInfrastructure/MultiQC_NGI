@@ -113,7 +113,7 @@ class ngi_metadata():
                     pids = self.find_ngi_project()
 
                 if len(pids) == 1:
-                    pid = pids.keys()[0]
+                    pid = list(pids.keys())[0]
                     log.info("Found one NGI project id: {}".format(pid))
 
                     # Get the metadata for the project
