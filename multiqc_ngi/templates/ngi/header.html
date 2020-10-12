@@ -42,7 +42,7 @@ was generated and the button that launches the welcome tour.
 {% if report.ngi['ngi_header'] %}
 <div class="well">
   <dl class="dl-horizontal" style="margin-bottom:0;">
-    {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi }}
+    {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi and report.ngi['contact_email'] is not none}}
     {{ '<dt>Application Type:</dt><dd>'+report.ngi['application']+'</dd>' if 'application' in report.ngi }}
     {{ '<dt>Library Method:</dt><dd>'+report.ngi['libprep']+'</dd>' if 'libprep' in report.ngi }}
     {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
