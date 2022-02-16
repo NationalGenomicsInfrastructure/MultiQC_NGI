@@ -579,7 +579,7 @@ class ngi_after_execution_finish():
                 if getattr(config, 'remote_sshkey', None) is not None:
                     scp_command.extend(['-i', config.remote_sshkey])
                 if getattr(config, 'remote_port', None) is not None:
-                    scp_command.extend(['-P', config.remote_port])
+                    scp_command.extend(['-P', str(config.remote_port)])
                 scp_command.extend([config.output_fn, config.remote_destination])
                 log.debug('Transferring report with command: {}'.format(' '.join(scp_command)))
                 DEVNULL = open(os.devnull, 'wb')
