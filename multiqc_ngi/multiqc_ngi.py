@@ -542,12 +542,11 @@ class ngi_metadata():
             couch_user = sdb_config['statusdb']['username']
             password = sdb_config['statusdb']['password']
             couch_url = sdb_config['statusdb']['url']
-            port = sdb_config['statusdb']['port']
         except KeyError:
             log.error("Error parsing the config file {}".format(conf_file))
             return None
 
-        server_url = "http://{}:{}@{}:{}".format(couch_user, password, couch_url, port)
+        server_url = "https://{}:{}@{}".format(couch_user, password, couch_url)
 
         # First, test that we can see the server.
         try:
