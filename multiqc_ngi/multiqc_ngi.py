@@ -232,7 +232,11 @@ class ngi_metadata():
 
         config.title = '{}: {}'.format(pid, p_summary['project_name'])
         config.project_name = p_summary['project_name']
-        config.output_fn_name = '{}_{}'.format(p_summary['project_name'], config.output_fn_name)
+        if config.analysis_dir and config.analysis_dir[0]=='qc_ngi':
+            infix = 'qc'
+        else:
+            infix = 'pipeline'
+        config.output_fn_name = f'{p_summary["project_name"]}_{infix}_{config.output_fn_name}'
         config.data_dir_name = '{}_{}'.format(p_summary['project_name'], config.data_dir_name)
         log.debug("Renaming report filename to '{}'".format(config.output_fn_name))
         log.debug("Renaming data directory to '{}'".format(config.data_dir_name))
