@@ -232,7 +232,7 @@ class ngi_metadata():
 
         config.title = '{}: {}'.format(pid, p_summary['project_name'])
         config.project_name = p_summary['project_name']
-        if config.analysis_dir and 'qc_ngi' in config.analysis_dir[0]:
+        if config.analysis_dir and ('qc_ngi' in config.analysis_dir[0] or 'qc_ngi' in os.getcwd()):
             infix = 'qc'
         else:
             infix = 'pipeline'
