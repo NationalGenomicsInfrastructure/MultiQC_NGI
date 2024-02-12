@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from pkg_resources import get_distribution
+from importlib.metadata import version
 from multiqc.utils import config
 
-__version__ = get_distribution("multiqc_ngi").version
+__version__ = version("multiqc_ngi")
 config.multiqc_ngi_version = __version__

@@ -14,8 +14,9 @@ import socket
 import subprocess
 import yaml
 
-from pkg_resources import get_distribution
-__version__ = get_distribution("multiqc_ngi").version
+from importlib.metadata import version
+
+__version__ = version("multiqc_ngi")
 
 from multiqc.utils import report, util_functions, config
 
