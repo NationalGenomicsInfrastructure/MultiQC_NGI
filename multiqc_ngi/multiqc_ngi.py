@@ -18,7 +18,8 @@ from importlib.metadata import version
 
 __version__ = version("multiqc_ngi")
 
-from multiqc.utils import report, util_functions, config
+from multiqc import report, config
+from multiqc.utils import util_functions
 
 log = logging.getLogger('multiqc')
 
