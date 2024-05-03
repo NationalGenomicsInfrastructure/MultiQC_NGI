@@ -30,7 +30,7 @@ setup(
         'simplejson',
         'pyyaml',
         'requests',
-        'multiqc'
+        'multiqc>=1.22.dev0'
     ],
     entry_points = {
         'multiqc.templates.v1': [
