@@ -322,7 +322,7 @@ class ngi_metadata():
             log.info('Found {} samples in StatusDB'.format(len(meta)))
 
             # Write to file
-            util_functions.write_data_file(meta, 'ngi_meta')
+            report.write_data_file(meta, 'ngi_meta')
 
             # Add to General Stats table
             gsdata = dict()
