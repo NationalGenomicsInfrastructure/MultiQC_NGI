@@ -296,7 +296,7 @@ class ngi_metadata():
     def fastqscreen_genome(self):
         """Add the Refrence genome from statusdb to fastq_screen html"""
         if report.ngi.get('reference_genome') is not None:
-            for m in report.modules_output:
+            for m in report.modules:
                 if m.anchor  == 'fastq_screen':
                     genome=report.ngi['reference_genome']
                     nice_names = {
