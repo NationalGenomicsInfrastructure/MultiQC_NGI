@@ -18,7 +18,8 @@ from importlib.metadata import version
 
 __version__ = version("multiqc_ngi")
 
-from multiqc.utils import report, util_functions, config
+from multiqc import report, config
+from multiqc.utils import util_functions
 
 log = logging.getLogger('multiqc')
 
@@ -233,7 +234,7 @@ class ngi_metadata():
 
         config.title = '{}: {}'.format(pid, p_summary['project_name'])
         config.project_name = p_summary['project_name']
-        if config.analysis_dir and ('qc_ngi' in config.analysis_dir[0] or 'qc_ngi' in os.listdir()):
+        if config.analysis_dir and ('qc_ngi' in str(config.analysis_dir[0]) or 'qc_ngi' in os.listdir()):
             infix = 'qc'
         else:
             infix = 'pipeline'
@@ -295,7 +296,7 @@ class ngi_metadata():
     def fastqscreen_genome(self):
         """Add the Refrence genome from statusdb to fastq_screen html"""
         if report.ngi.get('reference_genome') is not None:
-            for m in report.modules_output:
+            for m in report.modules:
                 if m.anchor  == 'fastq_screen':
                     genome=report.ngi['reference_genome']
                     nice_names = {
@@ -321,7 +322,7 @@ class ngi_metadata():
             log.info('Found {} samples in StatusDB'.format(len(meta)))
 
             # Write to file
-            util_functions.write_data_file(meta, 'ngi_meta')
+            report.write_data_file(meta, 'ngi_meta')
 
             # Add to General Stats table
             gsdata = dict()
