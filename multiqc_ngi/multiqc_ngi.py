@@ -83,11 +83,9 @@ class ngi_metadata():
                 return None
 
             # Run WGS Piper specific cleanup
-            for f in report.prep_ordered_search_files_list('piper_ngi')[1]:
-                if 'piper_ngi' in f[1].split(os.sep):
-                    log.info("Looks like WGS data - cleaning up report")
-                    self.ngi_wgs_cleanup()
-                    break
+            if 'piper_ngi' in report.files:
+                log.info("Looks like WGS data - cleaning up report")
+                self.ngi_wgs_cleanup()
 
             # Are we using the dummy test data?
             self.couch = None
@@ -539,20 +537,20 @@ class ngi_metadata():
 
     def connect_statusdb(self):
         """ Connect to statusdb """
+        conf_file = os.path.join(os.environ.get('HOME'), '.ngi_config', 'statusdb.yaml')
         try:
-            conf_file = os.path.join(os.environ.get('HOME'), '.ngi_config', 'statusdb.yaml')
             with open(conf_file, "r") as f:
                 sdb_config = yaml.safe_load(f)
                 log.debug("Got MultiQC_NGI statusdb config from the home directory.")
         except IOError:
-            log.debug("Could not open the MultiQC_NGI statusdb config file {conf_file}")
+            log.debug(f"Could not open the MultiQC_NGI statusdb config file {conf_file}")
             try:
                 with open(os.environ['STATUS_DB_CONFIG'], "r") as f:
                     sdb_config = yaml.safe_load(f)
                     log.debug(f"Got MultiQC_NGI statusdb config from $STATUS_DB_CONFIG: {os.environ['STATUS_DB_CONFIG']}")
             except (KeyError, IOError):
                 log.debug("Could not get the MultiQC_NGI statusdb config file from env STATUS_DB_CONFIG")
-                log.warn("Could not find a statusdb config file")
+                log.warning("Could not find a statusdb config file")
                 return None
         try:
             couch_user = sdb_config['statusdb']['username']
@@ -568,7 +566,7 @@ class ngi_metadata():
         try:
             requests.get(server_url, timeout=3)
         except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
-            log.warn("Cannot contact statusdb - skipping NGI metadata stuff")
+            log.warning("Cannot contact statusdb - skipping NGI metadata stuff")
             return None
 
         return Server(server_url)
