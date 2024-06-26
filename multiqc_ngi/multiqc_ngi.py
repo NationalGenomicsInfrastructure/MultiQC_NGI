@@ -19,9 +19,9 @@ from importlib.metadata import version
 __version__ = version("multiqc_ngi")
 
 from multiqc import report, config
-from multiqc.utils import util_functions
 
 log = logging.getLogger('multiqc')
+log.setLevel(logging.DEBUG)
 
 report.ngi = dict()
 
@@ -64,7 +64,7 @@ class ngi_metadata():
 
     def __init__(self):
 
-        log.debug("Running MultiQC_NGI v{} (after modules)".format(__version__))
+        log.debug(f"Running MultiQC_NGI v{__version__} (after modules)")
 
         # Global try statement to catch any unhandled exceptions and stop MultiQC from crashing
         try:
@@ -83,7 +83,7 @@ class ngi_metadata():
                 return None
 
             # Run WGS Piper specific cleanup
-            for f in report.searchfiles:
+            for f in report.prep_ordered_search_files_list('piper_ngi')[1]:
                 if 'piper_ngi' in f[1].split(os.sep):
                     log.info("Looks like WGS data - cleaning up report")
                     self.ngi_wgs_cleanup()
@@ -93,7 +93,7 @@ class ngi_metadata():
             self.couch = None
             self.test_data = None
             if 'test_database' in config.kwargs and config.kwargs['test_database'] is not None:
-                log.info("Using test data instead of connecting to StatusDB: {}".format(config.kwargs['test_database']))
+                log.info(f"Using test data instead of connecting to StatusDB: {config.kwargs['test_database']}")
                 with open(config.kwargs['test_database'], 'r') as tdata:
                     self.test_data = json.loads(tdata.read())
             else:
@@ -106,7 +106,7 @@ class ngi_metadata():
                 # Get project ID
                 pids = None
                 if 'project' in config.kwargs and config.kwargs['project'] is not None:
-                    log.info("Using supplied NGI project id: {}".format(config.kwargs['project']))
+                    log.info(f"Using supplied NGI project id: {config.kwargs['project']}")
                     pids = config.kwargs['project']
                     self.s_names = set()
                     for x in report.general_stats_data:
@@ -116,7 +116,7 @@ class ngi_metadata():
 
                 if len(pids) == 1:
                     pid = list(pids.keys())[0]
-                    log.info("Found one NGI project id: {}".format(pid))
+                    log.info(f"Found one NGI project id: {pid}")
 
                     # Get the metadata for the project
                     self.get_ngi_project_metadata(pid)
@@ -139,7 +139,7 @@ class ngi_metadata():
                         log.info("Not pushing results to StatusDB. To do this, use --push or set config push_statusdb: True")
 
                 elif len(pids) > 1:
-                    log.info("Found {} NGI project IDs: {}".format(len(pids), ", ".join(pids)))
+                    log.info(f"Found {len(pids)} NGI project IDs: {', '.join(pids)}")
                     for pid, s_names in pids.items():
                         self.get_ngi_samples_metadata(pid, s_names)
                     self.general_stats_sample_meta()
@@ -148,7 +148,7 @@ class ngi_metadata():
 
 
         except Exception as e:
-            log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
+            log.error(f"MultiQC_NGI v{__version__} crashed! Skipping...")
             log.exception(e)
             log.error("Continuing with base MultiQC execution.")
 
@@ -228,20 +228,20 @@ class ngi_metadata():
             try:
                 p_summary = p_summary['value']
             except TypeError:
-                log.error("statusdb returned no rows when querying {}".format(pid))
+                log.error(f"statusdb returned no rows when querying {pid}")
                 return None
-            log.debug("Found metadata for NGI project '{}'".format(p_summary['project_name']))
+            log.debug(f"Found metadata for NGI project '{p_summary['project_name']}'")
 
-        config.title = '{}: {}'.format(pid, p_summary['project_name'])
+        config.title = f"{pid}: {p_summary['project_name']}"
         config.project_name = p_summary['project_name']
         if config.analysis_dir and ('qc_ngi' in str(config.analysis_dir[0]) or 'qc_ngi' in os.listdir()):
             infix = 'qc'
         else:
             infix = 'pipeline'
         config.output_fn_name = f'{p_summary["project_name"]}_{infix}_{config.output_fn_name}'
-        config.data_dir_name = '{}_{}'.format(p_summary['project_name'], config.data_dir_name)
-        log.debug("Renaming report filename to '{}'".format(config.output_fn_name))
-        log.debug("Renaming data directory to '{}'".format(config.data_dir_name))
+        config.data_dir_name = f'{p_summary['project_name']}_{config.data_dir_name}'
+        log.debug(f"Renaming report filename to '{config.output_fn_name}'")
+        log.debug(f"Renaming data directory to '{config.data_dir_name}'")
 
         report.ngi['pid'] = pid
         report.ngi['project_name'] = p_summary['project_name']
@@ -263,13 +263,13 @@ class ngi_metadata():
                 report.ngi[i] = p_summary[j]
                 report.ngi['ngi_header'] = True
             except KeyError:
-                log.warn("Couldn't find '{}' in project summary".format(j))
+                log.warn(f"Couldn't find '{j}' in project summary")
         for i, j in d_keys.items():
             try:
                 report.ngi[i] = p_summary['details'][j]
                 report.ngi['ngi_header'] = True
             except KeyError:
-                log.warn("Couldn't find '{}' in project details".format(j))
+                log.warn(f"Couldn't find '{j}' in project details")
 
 
     def get_ngi_samples_metadata(self, pid, s_names=None):
@@ -280,7 +280,7 @@ class ngi_metadata():
             p_view = self.couch['projects'].view('project/samples')
             p_samples = p_view[pid]
             if not len(p_samples.rows) == 1:
-                log.error("statusdb returned {} rows when querying {}".format(len(p_samples.rows), pid))
+                log.error(f"statusdb returned {len(p_samples.rows)} rows when querying {pid}")
             else:
                 if 'sample_meta' not in report.ngi:
                     report.ngi['sample_meta'] = dict()
@@ -310,7 +310,7 @@ class ngi_metadata():
                               }
                     if genome in nice_names.keys():
                           genome = nice_names[genome]
-                    m.intro += '<p style="margin-top:20px;" class="text-info"> <span class="glyphicon glyphicon-piggy-bank"></span>  The reference genome in Genomic status is {}</p>'.format(genome)
+                    m.intro += f'<p style="margin-top:20px;" class="text-info"> <span class="glyphicon glyphicon-piggy-bank"></span>  The reference genome in Genomic status is {genome}</p>'
 
 
     def general_stats_sample_meta(self):
@@ -319,7 +319,7 @@ class ngi_metadata():
         meta = report.ngi.get('sample_meta')
         if meta is not None and len(meta) > 0:
 
-            log.info('Found {} samples in StatusDB'.format(len(meta)))
+            log.info(f'Found {len(meta)} samples in StatusDB')
 
             # Write to file
             report.write_data_file(meta, 'ngi_meta')
@@ -343,7 +343,7 @@ class ngi_metadata():
 
                 # Skip this sample if we don't have any matching data
                 if s_name is None:
-                    log.debug("Skipping StatusDB metadata for sample {} as no bioinfo report logs found.".format(sid))
+                    log.debug(f"Skipping StatusDB metadata for sample {sid} as no bioinfo report logs found.")
                     continue
 
                 # Make a dict to hold new data for General Stats
@@ -370,7 +370,7 @@ class ngi_metadata():
                                 seq_lp = lp
                             else:
                                 seq_lp = None
-                                log.warn('Found multiple sequenced lib preps for {} - skipping metadata'.format(sid))
+                                log.warn(f'Found multiple sequenced lib preps for {sid} - skipping metadata')
                                 break
                     except KeyError:
                         pass
@@ -387,17 +387,17 @@ class ngi_metadata():
                     except KeyError:
                         pass
 
-            log.info("Matched meta for {} samples from StatusDB with report sample names".format(len(s_names)))
+            log.info(f"Matched meta for {len(s_names)} samples from StatusDB with report sample names")
             if len(s_names) == 0:
                 return None
 
             # Deal with having more than one initial QC concentration unit
             formats_set = set(formats.values())
             if len(formats_set) > 1:
-                log.warning("Mixture of library_validation concentration units! Found: {}".format(", ".join(formats_set)))
+                log.warning(f"Mixture of library_validation concentration units! Found: {', '.join(formats_set)}")
                 for s_name in gsdata:
                     try:
-                        gsdata[s_name]['lp_concentration'] = '{} {}'.format(gsdata[s_name]['lp_concentration'], formats[s_name])
+                        gsdata[s_name]['lp_concentration'] = f'{gsdata[s_name]['lp_concentration']} {formats[s_name]}'
                     except KeyError:
                         pass
             elif len(formats_set) == 1:
@@ -443,11 +443,11 @@ class ngi_metadata():
             }
             gsheaders['lp_concentration'] = {
                 'namespace': 'NGI',
-                'title': 'Lib Conc. ({})'.format(conc_units),
-                'description': 'Library Prep: Concentration ({})'.format(conc_units),
+                'title': f'Lib Conc. ({conc_units})',
+                'description': f'Library Prep: Concentration ({conc_units})',
                 'min': 0,
                 'scale': 'YlGn',
-                'format': '{:.,0f}',
+                'format': '{:,.0f}',
                 'hidden': conc_hidden
             }
             gsheaders['amount_taken'] = {
@@ -456,7 +456,7 @@ class ngi_metadata():
                 'description': 'Library Prep: Amount Taken (ng)',
                 'min': 0,
                 'scale': 'YlGn',
-                'format': '{:.,0f}',
+                'format': '{:,.0f}',
                 'hidden': amounts_hidden
             }
             report.general_stats_data.append(gsdata)
@@ -535,11 +535,11 @@ class ngi_metadata():
                 sdb_config = yaml.safe_load(f)
                 log.debug("Got MultiQC_NGI statusdb config from the home directory.")
         except IOError:
-            log.debug("Could not open the MultiQC_NGI statusdb config file {}".format(conf_file))
+            log.debug("Could not open the MultiQC_NGI statusdb config file {conf_file}")
             try:
                 with open(os.environ['STATUS_DB_CONFIG'], "r") as f:
                     sdb_config = yaml.safe_load(f)
-                    log.debug("Got MultiQC_NGI statusdb config from $STATUS_DB_CONFIG: {}".format(os.environ['STATUS_DB_CONFIG']))
+                    log.debug(f"Got MultiQC_NGI statusdb config from $STATUS_DB_CONFIG: {os.environ['STATUS_DB_CONFIG']}")
             except (KeyError, IOError):
                 log.debug("Could not get the MultiQC_NGI statusdb config file from env STATUS_DB_CONFIG")
                 log.warn("Could not find a statusdb config file")
@@ -549,10 +549,10 @@ class ngi_metadata():
             password = sdb_config['statusdb']['password']
             couch_url = sdb_config['statusdb']['url']
         except KeyError:
-            log.error("Error parsing the config file {}".format(conf_file))
+            log.error(f"Error parsing the config file {conf_file}")
             return None
 
-        server_url = "https://{}:{}@{}".format(couch_user, password, couch_url)
+        server_url = f"https://{couch_user}:{password}@{couch_url}"
 
         # First, test that we can see the server.
         try:
@@ -569,7 +569,7 @@ class ngi_metadata():
 class ngi_after_execution_finish():
 
     def __init__(self):
-        log.debug("Running MultiQC_NGI v{} (after execution finish)".format(__version__))
+        log.debug(f"Running MultiQC_NGI v{__version__} (after execution finish)")
 
         if config.kwargs.get('disable_ngi', False) is True:
             log.debug("Skipping MultiQC_NGI (after execution finish) as 'disable_ngi' was specified")
@@ -586,7 +586,7 @@ class ngi_after_execution_finish():
                 if getattr(config, 'remote_port', None) is not None:
                     scp_command.extend(['-P', str(config.remote_port)])
                 scp_command.extend([config.output_fn, config.remote_destination])
-                log.debug('Transferring report with command: {}'.format(' '.join(scp_command)))
+                log.debug(f"Transferring report with command: {' '.join(scp_command)}")
                 DEVNULL = open(os.devnull, 'wb')
                 p = subprocess.Popen(scp_command, stdout=DEVNULL)
                 pid, exit_status = os.waitpid(p.pid, 0)
@@ -594,6 +594,6 @@ class ngi_after_execution_finish():
                     log.error("Not able to copy report to remote server: Subprocess command failed.")
 
         except Exception as e:
-            log.error("MultiQC_NGI v{} crashed! Skipping...".format(__version__))
+            log.error(f"MultiQC_NGI v{__version__} crashed! Skipping...")
             log.exception(e)
             log.error("Continuing with base MultiQC execution.")
