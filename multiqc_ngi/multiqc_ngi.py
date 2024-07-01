@@ -18,7 +18,7 @@ from importlib.metadata import version
 
 __version__ = version("multiqc_ngi")
 
-from multiqc import report, config
+from multiqc import report, config, utils
 
 log = logging.getLogger('multiqc')
 log.setLevel(logging.DEBUG)
@@ -524,7 +524,17 @@ class ngi_metadata():
                 doc['samples'][sid][key] = d[s_name]
 
         # Save object to the database
-        db.save(doc)
+        try:
+            db.save(doc)
+        except ValueError as e:
+            if e.args[0] == 'Out of range float values are not JSON compliant':
+                log.debug('Error saving to StatusDB: Out of range float values are not JSON compliant, might be NaNs, trying again...')
+                doc = json.loads(utils.util_functions.dump_json(doc, filehandle=None))
+                db.save(doc)
+                log.debug('Saved to StatusDB after converting NaNs to nulls')
+            else:
+                log.error(f'Error saving to StatusDB: {e}')
+                
 
 
     def connect_statusdb(self):
