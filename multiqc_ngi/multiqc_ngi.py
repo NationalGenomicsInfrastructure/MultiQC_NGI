@@ -236,8 +236,8 @@ class ngi_metadata():
             infix = 'qc'
         else:
             infix = 'pipeline'
-        config.output_fn_name = f'{p_summary["project_name"]}_{infix}_{config.output_fn_name}'
-        config.data_dir_name = f'{p_summary['project_name']}_{config.data_dir_name}'
+        config.output_fn_name = f"{p_summary['project_name']}_{infix}_{config.output_fn_name}"
+        config.data_dir_name = f"{p_summary['project_name']}_{config.data_dir_name}"
         log.debug(f"Renaming report filename to '{config.output_fn_name}'")
         log.debug(f"Renaming data directory to '{config.data_dir_name}'")
 
@@ -395,7 +395,7 @@ class ngi_metadata():
                 log.warning(f"Mixture of library_validation concentration units! Found: {', '.join(formats_set)}")
                 for s_name in gsdata:
                     try:
-                        gsdata[s_name]['lp_concentration'] = f'{gsdata[s_name]['lp_concentration']} {formats[s_name]}'
+                        gsdata[s_name]['lp_concentration'] = f"{gsdata[s_name]['lp_concentration']} {formats[s_name]}"
                     except KeyError:
                         pass
             elif len(formats_set) == 1:
