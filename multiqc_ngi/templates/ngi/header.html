@@ -65,10 +65,10 @@ was generated and the button that launches the welcome tour.
 
 <div id="analysis_dirs_wrapper">
   <p>Report generated on {{ config.creation_date }} based on data in:
-  {% if config.analysis_dir | length == 1 %}<code class="mqc_analysis_path">{{ config.analysis_dir[0] }}</code>
+  {% if report.analysis_files | length == 1 %}<code class="mqc_analysis_path">{{ report.analysis_files[0] }}</code>
   {% else %}
   <ul>
-    {% for d in config.analysis_dir %}
+    {% for d in report.analysis_files %}
     <li><code class="mqc_analysis_path">{{ d }}</code></li>
     {%  endfor %}
   </ul>
