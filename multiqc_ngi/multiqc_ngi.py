@@ -236,6 +236,13 @@ class ngi_metadata():
             infix = 'qc'
         else:
             infix = 'pipeline'
+        #If a filename is provided
+        if config.filename:
+            infix = f"{infix}_{config.filename}"
+            config.data_dir_name = f"{config.filename}_{config.data_dir_name}"
+            config.nondefault_config['data_dir_name'] = config.data_dir_name
+            config.plot_dir_name = f"{config.filename}_plots"
+            config.nondefault_config['plot_dir_name'] = config.plot_dir_name
         config.output_fn_name = f"{p_summary['project_name']}_{infix}_{config.output_fn_name}"
         config.data_dir_name = f"{p_summary['project_name']}_{config.data_dir_name}"
         log.debug(f"Renaming report filename to '{config.output_fn_name}'")
