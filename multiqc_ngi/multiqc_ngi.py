@@ -600,7 +600,7 @@ class ngi_after_execution_finish():
                     scp_command.extend(['-i', config.remote_sshkey])
                 if getattr(config, 'remote_port', None) is not None:
                     scp_command.extend(['-P', str(config.remote_port)])
-                scp_command.extend([config.output_fn, config.remote_destination])
+                scp_command.extend([config.output_fn_name, config.remote_destination])
                 log.debug(f"Transferring report with command: {' '.join(scp_command)}")
                 DEVNULL = open(os.devnull, 'wb')
                 p = subprocess.Popen(scp_command, stdout=DEVNULL)
