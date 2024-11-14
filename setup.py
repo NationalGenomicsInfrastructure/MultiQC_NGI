@@ -9,12 +9,15 @@ For more information about MultiQC, see http://multiqc.info
 """
 
 from setuptools import setup, find_packages
+import subprocess
 
-version = '0.8.0'
+
+def get_version():
+    return subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8")
 
 setup(
     name = 'multiqc_ngi',
-    version = version,
+    version = get_version(),
     author = 'Phil Ewels',
     author_email = 'phil.ewels@scilifelab.se',
     description = "MultiQC plugin for the National Genomics Infrastructure @ SciLifeLab Sweden",
@@ -26,7 +29,7 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     install_requires = [
-        'couchdb',
+        'ibmcloudant>=0.9.1'
         'simplejson',
         'pyyaml',
         'requests',
