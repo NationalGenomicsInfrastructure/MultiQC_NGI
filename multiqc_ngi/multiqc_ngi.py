@@ -4,13 +4,13 @@ core here to add in extra functionality. """
 
 from __future__ import print_function
 from collections import OrderedDict
-from couchdb import Server
 import logging
+from ibmcloudant import CouchDbSessionAuthenticator, cloudant_v1, ViewQuery
+from ibm_cloud_sdk_core import ApiException
 import json
 import os
 import re
 import requests
-import socket
 import subprocess
 import yaml
 
@@ -215,11 +215,11 @@ class ngi_metadata():
             if self.couch is None:
                 return None
             try:
-                p_view = self.couch['projects'].view('project/summary')
-            except socket.error:
+                p_view = self.couch.post_view(db="projects", ddoc="project", view="summary").get_result()
+            except ConnectionError:
                 log.error('CouchDB Operation timed out')
             p_summary = None
-            for row in p_view:
+            for row in p_view['rows']:
                 if row['key'][1] == pid:
                     p_summary = row
 
@@ -281,15 +281,15 @@ class ngi_metadata():
         """ Get project sample metadata from statusdb """
         if self.test_data is not None:
             report.ngi['sample_meta'] = self.test_data['samples']
-        elif self.couch is not None:
-            p_view = self.couch['projects'].view('project/samples')
-            p_samples = p_view[pid]
-            if not len(p_samples.rows) == 1:
-                log.error(f"statusdb returned {len(p_samples.rows)} rows when querying {pid}")
+        elif self.couch is not None:            
+            p_view_results = self.couch.post_view_queries(db="projects", ddoc="project", queries=[ViewQuery(key=pid)],
+                                                   view="samples").get_result()
+            if not len(p_view_results['results'][0]['rows']) == 1:
+                log.error(f"statusdb returned {len(p_view_results['results'][0]['rows'])} rows when querying {pid}")
             else:
                 if 'sample_meta' not in report.ngi:
                     report.ngi['sample_meta'] = dict()
-                report.ngi['sample_meta'].update(p_samples.rows[0]['value'])
+                report.ngi['sample_meta'].update(p_view_results['results'][0]['rows'][0]['value'])
 
         if 'ngi_names' not in report.ngi:
             report.ngi['ngi_names'] = dict()
@@ -483,18 +483,17 @@ class ngi_metadata():
         if self.couch is None:
             return None
         try:
-            db = self.couch['analysis']
-            p_view = db.view('project/project_id')
-        except socket.error:
+            p_view_results = self.couch.post_view_queries(db="analysis", ddoc="project", 
+                                                          queries=[ViewQuery(key=report.ngi['pid'])],
+                                                          view="project_id").get_result()
+        except ConnectionError:
             log.error('CouchDB Operation timed out')
             return None
 
         # Try to get an existing document if one exists
         doc = {}
-        for row in p_view:
-            if row['key'] == report.ngi['pid']:
-                doc = row.value
-                break
+        if p_view_results['results'][0]['rows']:
+            doc = p_view_results['results'][0]['rows'][0]['value']
 
         # Start fresh unless the existing doc looks similar
         newdoc = {
@@ -530,12 +529,12 @@ class ngi_metadata():
 
         # Save object to the database
         try:
-            db.save(doc)
-        except ValueError as e:
-            if e.args[0] == 'Out of range float values are not JSON compliant':
-                log.debug('Error saving to StatusDB: Out of range float values are not JSON compliant, might be NaNs, trying again...')
+            self.couch.post_document(db="analysis", document=doc).get_result()
+        except ApiException as e:
+            if e.message[0] == 'bad_request: invalid UTF-8 JSON':
+                log.debug('Error saving to StatusDB: bad_request: invalid UTF-8 JSON, might be NaNs, trying again...')
                 doc = json.loads(utils.util_functions.dump_json(doc, filehandle=None))
-                db.save(doc)
+                self.couch.post_document(db="analysis", document=doc).get_result()
                 log.debug('Saved to StatusDB after converting NaNs to nulls')
             else:
                 log.error(f'Error saving to StatusDB: {e}')
@@ -576,7 +575,10 @@ class ngi_metadata():
             log.warning("Cannot contact statusdb - skipping NGI metadata stuff")
             return None
 
-        return Server(server_url)
+        couch_server = cloudant_v1.CloudantV1(authenticator=CouchDbSessionAuthenticator(couch_user, password))
+        couch_server.set_service_url(f"https://{couch_url}")
+        
+        return couch_server
 
 
 

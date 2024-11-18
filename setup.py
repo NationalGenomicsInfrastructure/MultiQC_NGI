@@ -4,29 +4,32 @@ MultiQC_NGI is a plugin for MultiQC, providing additional tools which are
 specific to the National Genomics Infrastructure at the Science for Life
 Laboratory in Stockholm, Sweden.
 
+Author: Phil Ewels
+
 For more information about NGI, see http://www.scilifelab.se/platforms/ngi/
 For more information about MultiQC, see http://multiqc.info
 """
 
 from setuptools import setup, find_packages
+import subprocess
 
-version = '0.8.0'
+
+def get_version():
+    return subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8")
 
 setup(
     name = 'multiqc_ngi',
-    version = version,
-    author = 'Phil Ewels',
-    author_email = 'phil.ewels@scilifelab.se',
+    version = get_version(),
     description = "MultiQC plugin for the National Genomics Infrastructure @ SciLifeLab Sweden",
     long_description = __doc__,
     keywords = 'bioinformatics',
-    url = 'https://github.com/ewels/MultiQC_NGI',
-    download_url = 'https://github.com/ewels/MultiQC_NGI/releases',
+    url = 'https://github.com/NationalGenomicsInfrastructure/MultiQC_NGI',
+    download_url = 'https://github.com/NationalGenomicsInfrastructure/MultiQC_NGI/releases',
     license = 'MIT',
     packages = find_packages(),
     include_package_data = True,
     install_requires = [
-        'couchdb',
+        'ibmcloudant>=0.9.1'
         'simplejson',
         'pyyaml',
         'requests',
