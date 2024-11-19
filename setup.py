@@ -29,7 +29,7 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     install_requires = [
-        'ibmcloudant>=0.9.1'
+        'ibmcloudant>=0.9.1',
         'simplejson',
         'pyyaml',
         'requests',
