@@ -5,7 +5,7 @@ core here to add in extra functionality. """
 from __future__ import print_function
 from collections import OrderedDict
 import logging
-from ibmcloudant import CouchDbSessionAuthenticator, cloudant_v1, ViewQuery
+from ibmcloudant import CouchDbSessionAuthenticator, cloudant_v1
 from ibm_cloud_sdk_core import ApiException
 import json
 import os
@@ -282,7 +282,7 @@ class ngi_metadata():
         if self.test_data is not None:
             report.ngi['sample_meta'] = self.test_data['samples']
         elif self.couch is not None:            
-            p_view_results = self.couch.post_view_queries(db="projects", ddoc="project", queries=[ViewQuery(key=pid)],
+            p_view_results = self.couch.post_view_queries(db="projects", ddoc="project", queries=[cloudant_v1.ViewQuery(key=pid)],
                                                    view="samples").get_result()
             if not len(p_view_results['results'][0]['rows']) == 1:
                 log.error(f"statusdb returned {len(p_view_results['results'][0]['rows'])} rows when querying {pid}")
@@ -484,7 +484,7 @@ class ngi_metadata():
             return None
         try:
             p_view_results = self.couch.post_view_queries(db="analysis", ddoc="project", 
-                                                          queries=[ViewQuery(key=report.ngi['pid'])],
+                                                          queries=[cloudant_v1.ViewQuery(key=report.ngi['pid'])],
                                                           view="project_id").get_result()
         except ConnectionError:
             log.error('CouchDB Operation timed out')
