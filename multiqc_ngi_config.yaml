@@ -24,3 +24,4 @@ save_remote: True
 remote_sshkey: '~/.ssh/id_rsa'  # Optional
 remote_port: '5912'             # Optional
 remote_destination: 'genomics.www@tools.scilifelab.se:/var/local/mqc_reports/'
+preserve_module_raw_data: True
