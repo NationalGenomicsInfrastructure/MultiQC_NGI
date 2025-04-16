@@ -107,8 +107,12 @@ class ngi_metadata():
                     log.info(f"Using supplied NGI project id: {config.kwargs['project']}")
                     pids = config.kwargs['project']
                     self.s_names = set()
-                    for x in report.general_stats_data:
-                        self.s_names.update(x.keys())
+                    try:
+                        for x in report.general_stats_data:
+                            self.s_names.update(x.keys())
+                    except AttributeError:
+                        for section in report.general_stats_data.values():
+                            self.s_names.update(section.keys())
                 else:
                     pids = self.find_ngi_project()
 
