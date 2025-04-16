@@ -440,8 +440,19 @@ class ngi_metadata():
                 'description': 'User sample ID',
                 'scale': False
             }
-            report.general_stats_data.insert(0, gsdata)
-            report.general_stats_headers.insert(0, gsheaders_prepend)
+            from multiqc.plots.table_object import SampleGroup, InputRow, SampleName
+
+            report.general_stats_data = {
+                "NGI_before": {
+                    SampleGroup(sname): [InputRow(sample=SampleName(sname), data=data)]
+                    for sname, data in gsdata.items()
+                },
+                **report.general_stats_data,
+            }
+            report.general_stats_headers = {
+                "NGI_before": gsheaders_prepend,
+                **report.general_stats_headers,
+            }
 
             # Add columns to the far right of the General Stats table
             gsheaders = OrderedDict()
@@ -472,8 +483,11 @@ class ngi_metadata():
                 'format': '{:,.0f}',
                 'hidden': amounts_hidden
             }
-            report.general_stats_data.append(gsdata)
-            report.general_stats_headers.append(gsheaders)
+            report.general_stats_data["NGI_after"] = {
+                SampleGroup(sname): [InputRow(sample=SampleName(sname), data=data)]
+                for sname, data in gsdata.items()
+            }
+            report.general_stats_headers["NGI_after"] = gsheaders
 
 
 
