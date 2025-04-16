@@ -193,8 +193,12 @@ class ngi_metadata():
 
         # Collect sample IDs
         self.s_names = set()
-        for x in report.general_stats_data:
-            self.s_names.update(x.keys())
+        try:
+            for x in report.general_stats_data:
+                self.s_names.update(x.keys())
+        except AttributeError:
+            for section in report.general_stats_data.values():
+                self.s_names.update(section.keys())
         for d in report.saved_raw_data.values():
             try:
                 self.s_names.update(d.keys())
