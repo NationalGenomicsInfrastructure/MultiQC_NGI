@@ -10,18 +10,42 @@ For more information about NGI, see http://www.scilifelab.se/platforms/ngi/
 For more information about MultiQC, see http://multiqc.info
 """
 
-from setuptools import setup, find_packages
+import re
 import subprocess
+
+from setuptools import find_packages, setup
 
 
 def get_version():
-    return subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8")
+    try:
+        # Get the git tag
+        git_version = subprocess.check_output(["git", "describe", "--tags"]).strip().decode("utf-8")
+        
+        # Convert to PEP 440 compliant version
+        # If format is like '0.8.0-26-gccd731d', convert to '0.8.0.dev26+gccd731d'
+        match = re.match(r'([0-9]+\.[0-9]+\.[0-9]+)-([0-9]+)-g([0-9a-f]+)', git_version)
+        if match:
+            version, commits, sha = match.groups()
+            return f"{version}.dev{commits}+g{sha}"
+        
+        # If it's just a clean tag like '0.8.0', use it directly
+        if re.match(r'^[0-9]+\.[0-9]+\.[0-9]+$', git_version):
+            return git_version
+            
+        # For any other format, use a simplified fallback
+        return git_version.replace('-', '.').replace('g', '')
+    except:
+        # Fallback if git is not available
+        return '0.1.0'
+
+# Get the long description from the module docstring
+long_description = __doc__ or ""
 
 setup(
     name = 'multiqc_ngi',
     version = get_version(),
     description = "MultiQC plugin for the National Genomics Infrastructure @ SciLifeLab Sweden",
-    long_description = __doc__,
+    long_description = long_description,
     keywords = 'bioinformatics',
     url = 'https://github.com/NationalGenomicsInfrastructure/MultiQC_NGI',
     download_url = 'https://github.com/NationalGenomicsInfrastructure/MultiQC_NGI/releases',
