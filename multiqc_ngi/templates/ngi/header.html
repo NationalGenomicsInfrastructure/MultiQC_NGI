@@ -34,9 +34,9 @@ was generated and the button that launches the welcome tour.
 {% if config.report_header_info and config.report_header_info | length > 0 %}
 <div class="card mb-3">
   <div class="card-body">
-    <dl class="dl-horizontal" style="margin-bottom:0;">
+    <dl class="row mb-0">
       {% for d in config.report_header_info %}{% for k, v in d.items() %}
-        <dt>{{ k }}</dt><dd>{{ v }}</dd>
+        <dt class="col-sm-3">{{ k }}</dt><dd class="col-sm-9">{{ v }}</dd>
       {% endfor %}{% endfor %}
     </dl>
   </div>
@@ -46,13 +46,13 @@ was generated and the button that launches the welcome tour.
 {% if report.ngi['ngi_header'] %}
 <div class="card mb-3">
   <div class="card-body">
-    <dl class="dl-horizontal mb-0">
-      {{ '<dt>Contact E-mail:</dt><dd><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi and report.ngi['contact_email'] is not none}}
-      {{ '<dt>Application Type:</dt><dd>'+report.ngi['application']+'</dd>' if 'application' in report.ngi }}
-      {{ '<dt>Library Method:</dt><dd>'+report.ngi['libprep']+'</dd>' if 'libprep' in report.ngi }}
-      {{ '<dt>Sequencing Platform:</dt><dd>'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
-      {{ '<dt>Sequencing Setup:</dt><dd>'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
-      {{ '<dt>Reference Genome:</dt><dd>'+report.ngi['reference_genome']+'</dd>' if 'reference_genome' in report.ngi }}
+    <dl class="row mb-0">
+      {{ '<dt class="col-sm-3">Contact E-mail:</dt><dd class="col-sm-9"><a href="mailto:'+report.ngi['contact_email']+'">'+report.ngi['contact_email']+'</a></dd>' if 'contact_email' in report.ngi and report.ngi['contact_email'] is not none}}
+      {{ '<dt class="col-sm-3">Application Type:</dt><dd class="col-sm-9">'+report.ngi['application']+'</dd>' if 'application' in report.ngi }}
+      {{ '<dt class="col-sm-3">Library Method:</dt><dd class="col-sm-9">'+report.ngi['libprep']+'</dd>' if 'libprep' in report.ngi }}
+      {{ '<dt class="col-sm-3">Sequencing Platform:</dt><dd class="col-sm-9">'+report.ngi['sequencing_platform']+'</dd>' if 'sequencing_platform' in report.ngi }}
+      {{ '<dt class="col-sm-3">Sequencing Setup:</dt><dd class="col-sm-9">'+report.ngi['sequencing_setup']+'</dd>' if 'sequencing_setup' in report.ngi }}
+      {{ '<dt class="col-sm-3">Reference Genome:</dt><dd class="col-sm-9">'+report.ngi['reference_genome']+'</dd>' if 'reference_genome' in report.ngi }}
     </dl>
   </div>
 </div>
