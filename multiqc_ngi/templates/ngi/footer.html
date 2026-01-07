@@ -10,7 +10,9 @@ Content for the report footer.
 <div>
   <p>
       <a href="http://www.scilifelab.se/" target="_blank" class="float-end">
-          <img src="data:image/png;base64,{{ include_file('assets/img/SciLifeLab.png', b64=True) }}" style="height:41px;">
+          <img src="data:image/png;base64,{{ include_file('assets/img/SciLifeLab_Logotype_Green_NEG.png', b64=True) }}"
+          style="height:41px;"
+          class="scilifelab-logo">
       </a>
       <strong><a href="http://multiqc.info" target="_blank">MultiQC v{{ config.version }}</a></strong>
       - Written and maintained by <a href="http://phil.ewels.co.uk" target="_blank">Phil Ewels</a> at
@@ -25,3 +27,13 @@ Content for the report footer.
       <a href="https://github.com/eligrey/FileSaver.js" target="_blank">FileSaver.js</a>.
   </p>
 </div>
+
+<style>
+.scilifelab-logo {
+  content: url("data:image/png;base64,{{ include_file('assets/img/SciLifeLab.png', b64=True) }}");
+}
+
+[data-bs-theme="dark"] .scilifelab-logo {
+  content: url("data:image/png;base64,{{ include_file('assets/img/SciLifeLab_Logotype_Green_NEG.png', b64=True) }}");
+}
+</style>
