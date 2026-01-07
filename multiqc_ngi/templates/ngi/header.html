@@ -10,7 +10,10 @@ was generated and the button that launches the welcome tour.
 
 <h1 id="page_title">
   <a class="float-end" href="http://www.scilifelab.se/platforms/ngi/" target="_blank">
-    <img src="data:image/png;base64,{{ include_file('assets/img/NGI-final-small.png', b64=True) }}" title="National Genomics Infrastructure" style="max-width:320px;">
+    <picture>
+    <source srcset="data:image/svg+xml;base64,{{ include_file('assets/img/NGI_logo_dark_mode_20251110.svg', b64=True) }}" media="(prefers-color-scheme: dark)">
+    <img src="data:image/svg+xml;base64,{{ include_file('assets/img/NGI_logo_20251110.svg', b64=True) }}" title="National Genomics Infrastructure" style="max-width:320px;" alt="NGI Logo">
+</picture>
   </a>
   <a href="http://multiqc.info" target="_blank">
     <div class="multiqc-logo-wrapper">{{ include_file('assets/img/MultiQC_logo.svg') }}</div>
