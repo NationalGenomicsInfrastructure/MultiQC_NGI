@@ -11,14 +11,26 @@ was generated and the button that launches the welcome tour.
 <h1 id="page_title">
   <a class="float-end" href="http://www.scilifelab.se/platforms/ngi/" target="_blank">
     <picture>
-    <source srcset="data:image/svg+xml;base64,{{ include_file('assets/img/NGI_logo_dark_mode_20251110.svg', b64=True) }}" media="(prefers-color-scheme: dark)">
-    <img src="data:image/svg+xml;base64,{{ include_file('assets/img/NGI_logo_20251110.svg', b64=True) }}" title="National Genomics Infrastructure" style="max-width:320px;" alt="NGI Logo">
-</picture>
+      <img src="data:image/svg+xml;base64,{{ include_file('assets/img/NGI_logo_20251110.svg', b64=True) }}"
+       title="National Genomics Infrastructure"
+       style="max-width:320px;"
+       alt="NGI Logo"
+       class="ngi-logo">
+    </picture>
   </a>
   <a href="http://multiqc.info" target="_blank">
     <div class="multiqc-logo-wrapper">{{ include_file('assets/img/MultiQC_logo.svg') }}</div>
   </a>
 </h1>
+<style>
+.ngi-logo {
+  content: url("data:image/svg+xml;base64,{{ include_file('assets/img/NGI_logo_20251110.svg', b64=True) }}");
+}
+
+[data-bs-theme="dark"] .ngi-logo {
+  content: url("data:image/svg+xml;base64,{{ include_file('assets/img/NGI_logo_dark_mode_20251110.svg', b64=True) }}");
+}
+</style>
 <h1 class="my-4">
   {{ config.title if config.title != None else 'MultiQC Report' }}
 </h1>
