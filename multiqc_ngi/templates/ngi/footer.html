@@ -6,27 +6,8 @@
 Content for the report footer.
 
 #}
-{% set accreditation = {"stockholm": {"id": "1850", "logo": "Swedac-logo-stockholm.png"}, "uppsala": {"id": "1239", "logo": "Swedac-logo-uppsala.png"}} %}
-{% if config.swedac_accredited %}
-  {% set location_info = accreditation.get(config.swedac_location, {}) %}
-  {% if location_info %}
-    <a href="http://search.swedac.se/en/accreditations/{{ location_info.id }}" target="_blank" class="float-end">
-      <img src="data:image/png;base64,{{ include_file('assets/img/' + location_info.logo, b64=True) }}">
-    </a>
-  {% endif %}
-{% endif %}
 
-<div style="margin-right: 120px;">
-  {% if config.swedac_accredited and location_info %}
-    <div class="card text-muted mb-3">
-      <div class="card-body">
-        The National Genomics Infrastructure is accredited by
-        <a href="http://search.swedac.se/en/accreditations/{{ location_info.id }}" target="_blank" style="color:#777;">Swedac</a>.
-        This means that our services are subject to highly stringent quality control procedures, so that you can be
-        sure that your data is of excellent quality.
-      </div>
-    </div>
-  {% endif %}
+<div>
   <p>
       <a href="http://www.scilifelab.se/" target="_blank" class="float-end">
           <img src="data:image/png;base64,{{ include_file('assets/img/SciLifeLab.png', b64=True) }}" style="height:41px;">
